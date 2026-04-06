@@ -1,169 +1,110 @@
 <!doctype html>
-<html lang="en">
-  <!--begin::Head-->
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>AdminLTE 4 | Login Page</title>
-    <!--begin::Accessibility Meta Tags-->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-    <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" content="#007bff" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#1a1a1a" media="(prefers-color-scheme: dark)" />
-    <!--end::Accessibility Meta Tags-->
-    <!--begin::Primary Meta Tags-->
-    <meta name="title" content="AdminLTE 4 | Login Page" />
-    <meta name="author" content="ColorlibHQ" />
-    <meta
-      name="description"
-      content="AdminLTE is a Free Bootstrap 5 Admin Dashboard, 30 example pages using Vanilla JS. Fully accessible with WCAG 2.1 AA compliance."
-    />
-    <meta
-      name="keywords"
-      content="bootstrap 5, bootstrap, bootstrap 5 admin dashboard, bootstrap 5 dashboard, bootstrap 5 charts, bootstrap 5 calendar, bootstrap 5 datepicker, bootstrap 5 tables, bootstrap 5 datatable, vanilla js datatable, colorlibhq, colorlibhq dashboard, colorlibhq admin dashboard, accessible admin panel, WCAG compliant"
-    />
-    <!--end::Primary Meta Tags-->
-    <!--begin::Accessibility Features-->
-    <!-- Skip links will be dynamically added by accessibility.js -->
-    <meta name="supported-color-schemes" content="light dark" />
-    <link rel="preload" href="{{asset('adminlte/css/adminlte.css')}}" as="style" />
-    <!--end::Accessibility Features-->
-    <!--begin::Fonts-->
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.0.12/index.css"
-      integrity="sha256-tXJfXfp6Ewt1ilPzLDtQnJV4hclT9XuaZUKyUvmyr+Q="
-      crossorigin="anonymous"
-      media="print"
-      onload="this.media='all'"
-    />
-    <!--end::Fonts-->
-    <!--begin::Third Party Plugin(OverlayScrollbars)-->
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/styles/overlayscrollbars.min.css"
-      crossorigin="anonymous"
-    />
-    <!--end::Third Party Plugin(OverlayScrollbars)-->
-    <!--begin::Third Party Plugin(Bootstrap Icons)-->
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
-      crossorigin="anonymous"
-    />
-    <!--end::Third Party Plugin(Bootstrap Icons)-->
-    <!--begin::Required Plugin(AdminLTE)-->
+<html lang="id">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HRIS System | Login</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.0.12/index.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="{{asset('adminlte/css/adminlte.css')}}" />
-    <!--end::Required Plugin(AdminLTE)-->
-  </head>
-  <!--end::Head-->
-  <!--begin::Body-->
-  <body class="login-page bg-body-secondary">
-    <div class="login-box">
-      <div class="login-logo">
-        <a href="#"><b>Admin</b>LTE</a>
-      </div>
-      <!-- /.login-logo -->
-      <div class="card">
-        <div class="card-body login-card-body">
-          <p class="login-box-msg">Sign in to start your session</p>
-          @if(session('error'))
-            <p style="color:red;">{{ session('error') }}</p>
-          @endif
-          <form action="/login" method="POST">
-                @csrf
 
-                <div class="input-group mb-3">
-                    <input type="email" class="form-control" 
-                        placeholder="Email" name="email" required/>
-                    <div class="input-group-text">
-                        <span class="bi bi-envelope"></span>
-                    </div>
-                </div>
-
-                <div class="input-group mb-3">
-                    <input type="password" class="form-control" 
-                        placeholder="Password" name="password" required/>
-                    <div class="input-group-text">
-                        <span class="bi bi-lock-fill"></span>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-8">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="remember">
-                            <label class="form-check-label"> Remember Me </label>
-                        </div>
-                    </div>
-
-                    <div class="col-4">
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">
-                                Sign In
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </form>
-          <div class="social-auth-links text-center mb-3 d-grid gap-2">
-            <p>- OR -</p>
-            <a href="#" class="btn btn-primary">
-              <i class="bi bi-facebook me-2"></i> Sign in using Facebook
-            </a>
-            <a href="#" class="btn btn-danger">
-              <i class="bi bi-google me-2"></i> Sign in using Google+
-            </a>
-          </div>
-          <!-- /.social-auth-links -->
-          <p class="mb-1"><a href="forgot-password.html">I forgot my password</a></p>
-          <p class="mb-0">
-            <a href="register.html" class="text-center"> Register a new membership </a>
-          </p>
-        </div>
-        <!-- /.login-card-body -->
-      </div>
-    </div>
-    <!-- /.login-box -->
-    <!--begin::Third Party Plugin(OverlayScrollbars)-->
-    <script
-      src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.11.0/browser/overlayscrollbars.browser.es6.min.js"
-      crossorigin="anonymous"
-    ></script>
-    <!--end::Third Party Plugin(OverlayScrollbars)--><!--begin::Required Plugin(popperjs for Bootstrap 5)-->
-    <script
-      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
-      crossorigin="anonymous"
-    ></script>
-    <!--end::Required Plugin(popperjs for Bootstrap 5)--><!--begin::Required Plugin(Bootstrap 5)-->
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.min.js"
-      crossorigin="anonymous"
-    ></script>
-    <!--end::Required Plugin(Bootstrap 5)--><!--begin::Required Plugin(AdminLTE)-->
-    <script src="{{asset('adminlte/js/adminlte.js')}}"></script>
-    <!--end::Required Plugin(AdminLTE)--><!--begin::OverlayScrollbars Configure-->
-    <script>
-      const SELECTOR_SIDEBAR_WRAPPER = '.sidebar-wrapper';
-      const Default = {
-        scrollbarTheme: 'os-theme-light',
-        scrollbarAutoHide: 'leave',
-        scrollbarClickScroll: true,
-      };
-      document.addEventListener('DOMContentLoaded', function () {
-        const sidebarWrapper = document.querySelector(SELECTOR_SIDEBAR_WRAPPER);
-        if (sidebarWrapper && OverlayScrollbarsGlobal?.OverlayScrollbars !== undefined) {
-          OverlayScrollbarsGlobal.OverlayScrollbars(sidebarWrapper, {
-            scrollbars: {
-              theme: Default.scrollbarTheme,
-              autoHide: Default.scrollbarAutoHide,
-              clickScroll: Default.scrollbarClickScroll,
-            },
-          });
+    <style>
+        body.login-page {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            height: 100vh;
         }
-      });
-    </script>
-    <!--end::OverlayScrollbars Configure-->
-    <!--end::Script-->
-  </body>
-  <!--end::Body-->
+        .login-box {
+            width: 400px;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+        }
+        .login-logo b {
+            color: #007bff;
+        }
+        .btn-primary {
+            border-radius: 8px;
+            padding: 10px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,123,255,0.3);
+        }
+        .input-group-text {
+            background-color: transparent;
+            border-left: none;
+            color: #adb5bd;
+        }
+        .form-control {
+            border-right: none;
+            padding: 12px;
+            border-radius: 8px 0 0 8px;
+        }
+        .form-control:focus {
+            box-shadow: none;
+            border-color: #dee2e6;
+        }
+        .form-control:focus + .input-group-text {
+            border-color: #dee2e6;
+        }
+        .social-auth-links .btn {
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body class="login-page">
+    <div class="login-box text-center">
+        <div class="login-logo mb-4">
+            <a href="#" class="text-decoration-none">
+                <i class="bi bi-person-badge-fill text-primary mr-2"></i>
+                <b>HRS</b>SYSTEM
+            </a>
+        </div>
+        
+        <div class="card card-outline card-primary">
+            <div class="card-body login-card-body p-4">
+                <h5 class="text-dark font-weight-bold mb-1">Selamat Datang</h5>
+                <p class="text-muted small mb-4">Silakan masuk ke akun Anda</p>
+                @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show text-start py-2" role="alert">
+                    <small><i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}</small>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                @endif
+
+                <form action="/login" method="POST">
+                    @csrf
+                    <div class="input-group mb-3">
+                        <input type="email" class="form-control shadow-none" placeholder="Email" name="email" required autofocus />
+                        <div class="input-group-text">
+                            <span class="bi bi-envelope"></span>
+                        </div>
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <input type="password" class="form-control shadow-none" placeholder="Password" name="password" required />
+                        <div class="input-group-text">
+                            <span class="bi bi-lock-fill"></span>
+                        </div>
+                    </div>
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn btn-primary shadow-sm">
+                            Masuk Ke Sistem
+                        </button>
+                    </div>
+                </form>
+        <p class="mt-4 text-muted small">&copy; 2026 SDM SISTEM</p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
+    <script src="{{asset('adminlte/js/adminlte.js')}}"></script>
+</body>
 </html>

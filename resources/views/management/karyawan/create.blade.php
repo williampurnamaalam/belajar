@@ -102,39 +102,50 @@
                                     @error('password') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
                             </div>
-
                             <div class="form-group">
-                                <label>Jabatan <span class="text-danger">*</span></label>
-                                <select name="jabatan_id" class="form-control select2 @error('jabatan_id') is-invalid @enderror">
-                                    <option value="">-- Pilih Jabatan --</option>
-                                    @foreach($jabatans as $j)
-                                        <option value="{{ $j->id }}" {{ old('jabatan_id') == $j->id ? 'selected' : '' }}>{{ $j->nama_jabatan }}</option>
-                                    @endforeach
-                                </select>
-                                @error('jabatan_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
+                        <label for="jabatan_id">Jabatan <span class="text-danger">*</span></label>
+                        <select name="jabatan_id" id="jabatan_id" class="form-control select2 @error('jabatan_id') is-invalid @enderror" style="width: 100%;">
+                            <option value="">-- Pilih Jabatan --</option>
+                            @foreach($jabatans as $jb)
+                                <option value="{{ $jb->id }}" {{ old('jabatan_id') == $jb->id ? 'selected' : '' }}>
+                                    {{ $jb->jabatan }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('jabatan_id')
+                            <span class="invalid-feedback">{{ $message }}</span>
+                        @enderror
+                    </div>
 
-                            <div class="form-group">
-                                <label>Divisi <span class="text-danger">*</span></label>
-                                <select name="divisi_id" class="form-control select2 @error('divisi_id') is-invalid @enderror">
-                                    <option value="">-- Pilih Divisi --</option>
-                                    @foreach($divisis as $d)
-                                        <option value="{{ $d->id }}" {{ old('divisi_id') == $d->id ? 'selected' : '' }}>{{ $d->nama_divisi }}</option>
-                                    @endforeach
-                                </select>
-                                @error('divisi_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
+                    <div class="form-group">
+                        <label for="divisi_id">Divisi <span class="text-danger">*</span></label>
+                        <select name="divisi_id" id="divisi_id" class="form-control select2 @error('divisi_id') is-invalid @enderror" style="width: 100%;">
+                            <option value="">-- Pilih Divisi --</option>
+                            @foreach($divisis as $d)
+                                <option value="{{ $d->id }}" {{ old('divisi_id') == $d->id ? 'selected' : '' }}>
+                                    {{ $d->divisi }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('divisi_id')
+                            <span class="invalid-feedback">{{ $message }}</span>
+                        @enderror
+                    </div>
 
-                            <div class="form-group">
-                                <label>Role Akses <span class="text-danger">*</span></label>
-                                <select name="role_id" class="form-control @error('role_id') is-invalid @enderror">
-                                    <option value="">-- Pilih Role --</option>
-                                    @foreach($roles as $r)
-                                        <option value="{{ $r->id }}" {{ old('role_id') == $r->id ? 'selected' : '' }}>{{ strtoupper($r->nama_role) }}</option>
-                                    @endforeach
-                                </select>
-                                @error('role_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                            </div>
+                    <div class="form-group">
+                        <label for="role_id">Role Akses <span class="text-danger">*</span></label>
+                        <select name="role_id" id="role_id" class="form-control select2 @error('role_id') is-invalid @enderror" style="width: 100%;">
+                            <option value="">-- Pilih Role --</option>
+                            @foreach($roles as $r)
+                                <option value="{{ $r->id }}" {{ old('role_id') == $r->id ? 'selected' : '' }}>
+                                    {{ strtoupper($r->role) }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('role_id')
+                            <span class="invalid-feedback">{{ $message }}</span>
+                        @enderror
+                    </div>
                         </div>
                     </div>
                 </div>

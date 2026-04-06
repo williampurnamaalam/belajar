@@ -5,7 +5,6 @@
 @section('content')
 <div class="row">
     <div class="col-md-11 mx-auto">
-        {{-- Pastikan Route diarahkan ke profile.update sesuai web.php Anda --}}
         <form action="{{ route('profile.update') }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
@@ -122,15 +121,12 @@
                                     @error('password') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
                             </div>
-
-                            {{-- Hidden fields agar request tetap valid dengan aturan 'required' di Controller jika perlu --}}
                             <input type="hidden" name="jabatan_id" value="{{ auth()->user()->jabatan_id }}">
                             <input type="hidden" name="divisi_id" value="{{ auth()->user()->divisi_id }}">
                             <input type="hidden" name="role_id" value="{{ auth()->user()->role_id }}">
                             <input type="hidden" name="gender" value="{{ auth()->user()->gender }}">
                             <input type="hidden" name="nip" value="{{ auth()->user()->nip }}">
                             <input type="hidden" name="email" value="{{ auth()->user()->email }}">
-
                         </div>
                         <div class="card-footer bg-white text-right">
                             <a href="{{ route('profile') }}" class="btn btn-link text-secondary mr-2">Batal</a>

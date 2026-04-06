@@ -14,13 +14,15 @@ use Illuminate\Validation\Rule;
 
 class KaryawanController extends Controller
 {
-    public function index(){
-        return view('management.karyawan.index',);
+    public function index()
+    {
+        $karyawans = User::with(['jabatan', 'divisi', 'role'])->latest()->get();
+
+        return view('management.karyawan.index', compact('karyawans'));
     }
 
     public function create()
     {
-        // 1. Ambil semua data dari tabel masing-masing
         $roles = Role::all();
         $jabatans = Jabatan::all();
         $divisis = Divisi::all();
@@ -28,48 +30,93 @@ class KaryawanController extends Controller
         
         return view('management.karyawan.create', compact('roles', 'jabatans', 'divisis'));
     }
-
-    public function store (Request $request)
+        public function edit($id)
     {
-        $request->validate([
-            'nama'=>['required','max:100'],
-            'email'=>['required','max:100'],
-            'password'=>['required','min:4'],
-            'tanggal_lahir'=>['required','max:100'],
-            'telepon'=>['required','max:15'],
-            'jabatan_id'=>['required','exists:jabatans,id'],
-            'divisi_id'=>['required','exists:divisis,id'],
-            'nik'=>['required','max:50'],
-            'nip'=>['required','max:50'],
-            'gender'=>['required',Rule::in(['pria','wanita'])],
-            'role_id'=>['required','exists:roles,id'],
-        ]);
-        User::create($request->validated());
-        return redirect('/karyawan')->with('success','berhasil menambah data');
-
-
+        $karyawan = User::findOrFail($id); 
+        $jabatans = Jabatan::all();       
+        $divisis = Divisi::all();          
+        
+        return view('management.karyawan.edit', compact('karyawan', 'jabatans', 'divisis'));
     }
 
+    public function store(Request $request)
+    {
+        $request->validate([
+            'nama'          => ['required', 'max:100'],
+            'email'         => ['required', 'email', 'max:100', 'unique:users,email'],
+            'password'      => ['required', 'min:4'],
+            'tanggal_lahir' => ['required', 'date'],
+            'telepon'       => ['required', 'max:15'],
+            'jabatan_id'    => ['required', 'exists:jabatan,id'], 
+            'divisi_id'     => ['required', 'exists:divisi,id'],
+            'role_id'       => ['required', 'exists:role,id'],
+            'nik'           => ['required', 'max:50'],
+            'nip'           => ['required', 'max:50'],
+            'gender'        => ['required', Rule::in(['Pria', 'Wanita'])],
+        ]);
 
+        $data = $request->all();
+        $data['password'] = Hash::make($request->password);
 
+        User::create($data);
+        return redirect('/karyawan')->with('success', 'Berhasil menambah data');
+    }
 
+    public function update(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
 
+        $request->validate([
+            'nama'          => ['required', 'string', 'max:100'],
+            'email'         => ['required', 'email', 'max:100', 'unique:users,email,' . $id],
+            'password'      => ['nullable', 'min:4'],
+            'tanggal_lahir' => ['required', 'date'],
+            'telepon'       => ['required', 'max:15'],
+            'jabatan_id'    => ['required', 'exists:jabatan,id'], 
+            'divisi_id'     => ['required', 'exists:divisi,id'],  
+            'nik'           => ['required', 'max:50'],
+            'nip'           => ['required', 'max:50'],
+            'gender'        => ['required', Rule::in(['Pria', 'Wanita'])], 
+            'role_id'       => ['required', 'exists:role,id'], 
+        ]);
 
+        $data = $request->except(['password', 'profile_picture']); 
+        
+        if ($request->filled('password')) {
+            $data['password'] = Hash::make($request->password);
+        }
 
+        $user->update($data);
 
+        return redirect('/karyawan')->with('success', 'Data karyawan berhasil diperbarui');
+    }
 
+    public function destroy($id)
+    {
+        $user = User::findOrFail($id);
 
+        if ($user->id === auth()->id()) {
+            return redirect('/karyawan')->with('error', 'Anda tidak dapat menghapus akun Anda sendiri!');
+        }
 
+        if ($user->profile_picture) {
+            Storage::delete('public/' . $user->profile_picture);
+        }
 
+        $user->delete();
 
+        return redirect('/karyawan')->with('success', 'Karyawan berhasil dihapus');
+    }
 
+    public function show($id)
+    {
 
-
-
+        $user = User::with(['role', 'jabatan', 'divisi'])->findOrFail($id);
+        return view('profile.index', compact('user'));
+    }
 
     public function showProfile($id = null) 
     {
-        // Jika $id kosong, ambil ID dari user yang sedang login
         $userId = $id ?: auth()->id(); 
 
         $user = User::findOrFail($userId);
