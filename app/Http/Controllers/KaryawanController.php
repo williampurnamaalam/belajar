@@ -86,7 +86,7 @@ class KaryawanController extends Controller
         $request->validate([
             'nama'          => ['required', 'max:100'],
             'email'         => ['required', 'email', 'max:100', 'unique:users,email'],
-            'password'      => ['required', 'min:4'],
+            // 'password'      => ['required', 'min:4'],
             'tanggal_lahir' => ['required', 'date'],
             'telepon'       => ['required', 'max:15'],
             'jabatan_id'    => ['required', 'exists:jabatan,id'], 
@@ -97,10 +97,26 @@ class KaryawanController extends Controller
             'gender'        => ['required', Rule::in(['Pria', 'Wanita'])],
         ]);
 
-        $data = $request->all();
-        $data['password'] = Hash::make($request->password);
+        // $data = $request->all();
+        // $data['password'] = Hash::make($request->password);
 
-        User::create($data);
+        // User::create($data);
+        $data = new User();
+        $data->nama = $request->nama;
+        $data->email = $request->email;
+        $data->password = 'admin';
+        $data->password = Hash::make($data->password);
+        $data->role_id = $request->role_id;
+        $data->jabatan_id = $request->jabatan_id;
+        $data->divisi_id = $request->divisi_id;
+        $data->tanggal_lahir = $request->tanggal_lahir;
+        $data->telepon = $request->telepon;
+        $data->nik = $request->nik;
+        $data->nip = $request->nip;
+        $data->gender = $request->gender;
+        $data->save();
+
+
         return redirect('/karyawan')->with('success', 'Berhasil menambah data');
     }
 
