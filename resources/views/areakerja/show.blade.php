@@ -20,9 +20,50 @@
                             <span class="float-right badge badge-primary p-2">{{ $area->karyawans->count() }} Orang</span>
                         </li>
                     </ul>
+
+                    <div class="mt-4 p-3 border rounded bg-white shadow-xs">
+                        <strong class="text-dark d-block mb-2">
+                            <i class="fas fa-signal mr-1 text-success"></i> IP Wi-Fi Aktif
+                        </strong>
+                        <div class="d-flex flex-wrap" style="gap: 5px;">
+                            @if(!empty($area->ip_address))
+                                @php
+                                    $ips = is_array($area->ip_address) ? $area->ip_address : explode(',', $area->ip_address);
+                                @endphp
+                                @foreach($ips as $ip)
+                                    <span class="badge badge-light border px-2 py-1">
+                                        <i class="fas fa-wifi text-muted mr-1 small"></i> {{ trim($ip) }}
+                                    </span>
+                                @endforeach
+                            @else
+                                <span class="text-muted small italic">Belum ada IP terdaftar</span>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="mt-3 p-3 border rounded bg-light">
+                        <strong class="text-dark d-block mb-2">
+                            <i class="fas fa-edit mr-1 text-primary"></i> Update Daftar IP
+                        </strong>
+                        <form action="{{ route('areakerja.update_ip', $area->id) }}" method="POST">
+                            @csrf
+                            @method('PUT')
+                            <div class="form-group mb-2">
+                                <textarea name="ip_address" class="form-control form-control-sm" rows="3" 
+                                          placeholder="Contoh: 192.168.1.1, 103.11.22.33">{{ is_array($area->ip_address) ? implode(', ', $area->ip_address) : $area->ip_address }}</textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-sm btn-block shadow-sm font-weight-bold">
+                                <i class="fas fa-sync-alt mr-1"></i> Simpan Perubahan
+                            </button>
+                        </form>
+                        <small class="text-muted mt-2 d-block" style="font-size: 0.7rem; line-height: 1.2;">
+                            *Gunakan koma (,) sebagai pemisah jika terdapat lebih dari satu alamat IP Wi-Fi.
+                        </small>
+                    </div>
+
                     <div class="mt-4">
                         <strong class="text-dark"><i class="fas fa-info-circle mr-1 text-primary"></i> Deskripsi Lokasi</strong>
-                        <p class="text-muted small mt-2 bg-light p-3 rounded border">
+                        <p class="text-muted small mt-2 bg-light p-3 rounded border text-justify">
                             {{ $area->detail ?? 'Tidak ada informasi tambahan untuk area ini.' }}
                         </p>
                     </div>
@@ -32,10 +73,12 @@
                 </div>
             </div>
         </div>
+        
         <div class="col-md-8">
+            {{-- Tabel Personil Tetap --}}
             <div class="card shadow-sm border-0">
-                <div class="card-header bg-white py-3">
-                    <h3 class="card-title font-weight-bold text-dark">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h3 class="card-title font-weight-bold text-dark mb-0">
                         <i class="fas fa-users-cog mr-2 text-primary"></i>Daftar Personil Aktif
                     </h3>
                 </div>
@@ -43,11 +86,11 @@
                     <div class="table-responsive">
                         <table id="table-personil-area" class="table table-hover w-100">
                             <thead>
-                                <tr class="bg-light">
-                                    <th>NAMA KARYAWAN</th>
-                                    <th>JABATAN</th>
-                                    <th>DIVISI</th>
-                                    <th class="text-center">AKSI</th>
+                                <tr class="bg-light text-uppercase small font-weight-bold">
+                                    <th>Nama Karyawan</th>
+                                    <th>Jabatan</th>
+                                    <th>Divisi</th>
+                                    <th class="text-center">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -58,14 +101,14 @@
                                         <small class="text-muted">{{ $karyawan->nip ?? 'No NIP' }}</small>
                                     </td>
                                     <td class="align-middle">
-                                        <span class="badge badge-info shadow-xs">{{ $karyawan->jabatan->jabatan ?? '-' }}</span>
+                                        <span class="badge badge-info shadow-xs font-weight-normal">{{ $karyawan->jabatan->jabatan ?? '-' }}</span>
                                     </td>
                                     <td class="align-middle text-muted">
                                         {{ $karyawan->divisi->divisi ?? '-' }}
                                     </td>
                                     <td class="text-center align-middle">
                                         <a href="{{ route('karyawan.show', $karyawan->id) }}" class="btn btn-light btn-sm border shadow-sm" title="Lihat Profil">
-                                            <i class="fas fa-external-link-alt text-primary"></i>
+                                            <i class="fas fa-user-tag text-primary"></i>
                                         </a>
                                     </td>
                                 </tr>
@@ -79,53 +122,3 @@
     </div>
 </div>
 @endsection
-
-@push('styles')
-{{-- Library DataTables Bootstrap 4 --}}
-<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css">
-<style>
-    #table-personil-area thead th {
-        border-top: none;
-        font-size: 0.85rem;
-        letter-spacing: 0.5px;
-        color: #555;
-    }
-    .dataTables_filter input {
-        border-radius: 20px;
-        padding-left: 15px;
-        border: 1px solid #ddd;
-    }
-    .dataTables_filter input:focus {
-        box-shadow: 0 0 5px rgba(0,123,255,.25);
-        border-color: #80bdff;
-    }
-</style>
-@endpush
-
-@push('scripts')
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap4.min.js"></script>
-<script>
-    $(document).ready(function() {
-        $('#table-personil-area').DataTable({
-            "responsive": true,
-            "pageLength": 10,
-            "lengthMenu": [[5, 10, 25, 50, -1], [5, 10, 25, 50, "Semua"]],
-            "language": {
-                "search": "_INPUT_",
-                "searchPlaceholder": "Cari nama karyawan...",
-                "lengthMenu": "Tampilkan _MENU_ data",
-                "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ personil",
-                "zeroRecords": "Tidak ada personil yang ditemukan",
-                "paginate": {
-                    "previous": "<i class='fas fa-angle-left'></i>",
-                    "next": "<i class='fas fa-angle-right'></i>"
-                }
-            },
-            "dom": "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
-                   "<'row'<'col-sm-12'tr>>" +
-                   "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
-        });
-    });
-</script>
-@endpush

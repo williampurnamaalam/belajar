@@ -4,7 +4,35 @@
 @section('title', 'Data Karyawan')
 
 @section('content')
-<div class="row">
+    <div class="row">
+        <div class="container-fluid">
+        @if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show shadow-sm border-0" role="alert" style="border-left: 5px solid #28a745 !important;">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-check-circle mr-3 fa-lg"></i>
+            <div>
+                <span class="font-weight-bold">Berhasil!</span> {{ session('success') }}
+            </div>
+        </div>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    @endif
+
+    @if(session('error'))
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm border-0" role="alert" style="border-left: 5px solid #dc3545 !important;">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-exclamation-triangle mr-3 fa-lg"></i>
+            <div>
+                <span class="font-weight-bold">Gagal!</span> {{ session('error') }}
+            </div>
+        </div>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    @endif
     <div class="col-12">
         <div class="card card-outline card-primary shadow-sm">
             <div class="card-header">

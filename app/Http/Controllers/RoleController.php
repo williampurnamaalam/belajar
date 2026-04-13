@@ -46,7 +46,7 @@ class RoleController extends Controller
     {
         $request->validate([
         
-            'role' => 'required|string|max:100|unique:roles,nama_role,' . $id,
+            'role' => 'required|string|max:100|unique:role,role,' . $id,
         ], [
             'role.required' => 'Nama role wajib diisi.',
             'role.unique'   => 'Nama role ini sudah terdaftar di sistem.',

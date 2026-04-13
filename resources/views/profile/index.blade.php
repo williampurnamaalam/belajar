@@ -48,7 +48,7 @@
                             <li class="list-group-item border-bottom-0">
                                 <b>Divisi</b> 
                                 <span class="float-right text-muted">                    
-                                    {{ $user->divisi->nama_divisi ?? '-' }}
+                                    {{ $user->divisi->divisi ?? '-' }}
                                 </span>
                             </li>
                         </ul>
@@ -118,7 +118,7 @@
                                 </div>
                                 <div class="row border-bottom py-2">
                                     <div class="col-sm-4 text-muted font-weight-bold">Departemen / Divisi</div>
-                                    <div class="col-sm-8">{{ $user->divisi->nama_divisi ?? '-' }}</div>
+                                    <div class="col-sm-8">{{ $user->divisi->divisi ?? '-' }}</div>
                                 </div>
                                 <div class="row border-bottom py-2">
                                     <div class="col-sm-4 text-muted font-weight-bold">Jabatan Resmi</div>

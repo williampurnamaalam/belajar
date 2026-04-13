@@ -30,13 +30,55 @@ class KaryawanController extends Controller
         
         return view('management.karyawan.create', compact('roles', 'jabatans', 'divisis'));
     }
-        public function edit($id)
+       public function edit($id)
     {
         $karyawan = User::findOrFail($id); 
         $jabatans = Jabatan::all();       
         $divisis = Divisi::all();          
+        $roles = Role::all(); // TAMBAHKAN INI: Ambil data role
         
-        return view('management.karyawan.edit', compact('karyawan', 'jabatans', 'divisis'));
+        // TAMBAHKAN $roles ke dalam compact
+        return view('management.karyawan.edit', compact('karyawan', 'jabatans', 'divisis', 'roles'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+        $request->validate([
+            'nama'          => ['required', 'string', 'max:100'],
+            'email'         => ['required', 'email', 'max:100', 'unique:users,email,' . $id],
+            'password'      => ['nullable', 'min:4'],
+            'tanggal_lahir' => ['required', 'date'],
+            'telepon'       => ['required', 'max:15'],
+            'jabatan_id'    => ['required'], 
+            'divisi_id'     => ['required'], 
+            'role_id'       => ['required'], 
+            'nik'           => ['required', 'max:50'],
+            'nip'           => ['required', 'max:50'],
+            'gender'        => ['required', Rule::in(['Pria', 'Wanita'])], 
+            'profile_picture' => ['nullable', 'image', 'mimes:jpg,png,jpeg', 'max:2048'],
+        ]);
+
+        try {
+            $data = $request->except(['password', 'profile_picture']); 
+            if ($request->filled('password')) {
+                $data['password'] = Hash::make($request->password);
+            }
+
+            if ($request->hasFile('profile_picture')) {
+                if ($user->profile_picture && Storage::exists('public/' . $user->profile_picture)) {
+                    Storage::delete('public/' . $user->profile_picture);
+                }
+                $path = $request->file('profile_picture')->store('profile_pictures', 'public');
+                $data['profile_picture'] = $path;
+            }
+
+            $user->update($data);
+            return redirect('/karyawan')->with('success', 'Data karyawan berhasil diperbarui');
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
+        }
     }
 
     public function store(Request $request)
@@ -62,39 +104,10 @@ class KaryawanController extends Controller
         return redirect('/karyawan')->with('success', 'Berhasil menambah data');
     }
 
-    public function update(Request $request, $id)
-    {
-        $user = User::findOrFail($id);
-
-        $request->validate([
-            'nama'          => ['required', 'string', 'max:100'],
-            'email'         => ['required', 'email', 'max:100', 'unique:users,email,' . $id],
-            'password'      => ['nullable', 'min:4'],
-            'tanggal_lahir' => ['required', 'date'],
-            'telepon'       => ['required', 'max:15'],
-            'jabatan_id'    => ['required', 'exists:jabatan,id'], 
-            'divisi_id'     => ['required', 'exists:divisi,id'],  
-            'nik'           => ['required', 'max:50'],
-            'nip'           => ['required', 'max:50'],
-            'gender'        => ['required', Rule::in(['Pria', 'Wanita'])], 
-            'role_id'       => ['required', 'exists:role,id'], 
-        ]);
-
-        $data = $request->except(['password', 'profile_picture']); 
-        
-        if ($request->filled('password')) {
-            $data['password'] = Hash::make($request->password);
-        }
-
-        $user->update($data);
-
-        return redirect('/karyawan')->with('success', 'Data karyawan berhasil diperbarui');
-    }
 
     public function destroy($id)
     {
         $user = User::findOrFail($id);
-
         if ($user->id === auth()->id()) {
             return redirect('/karyawan')->with('error', 'Anda tidak dapat menghapus akun Anda sendiri!');
         }

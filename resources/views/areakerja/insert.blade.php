@@ -188,6 +188,20 @@ $(document).ready(function () {
                "<'row'<'col-sm-12'tr>>" +
                "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
     });
+
+    $('form').on('submit', function(e) {
+        var form = this;
+        table.$('input[type="checkbox"]:checked').each(function() {
+            if(!$.contains(document, this)){
+                $(form).append(
+                    $('<input>')
+                        .attr('type', 'hidden')
+                        .attr('name', this.name)
+                        .val(this.value)
+                );
+            }
+        });
+    });
 });
 </script>
 @endpush

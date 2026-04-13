@@ -18,20 +18,17 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
-        'nama',
-        'email',
-        'password',
-        'role_id',
-        'tanggal_lahir',
-        'telepon',
-        'is_active',
-        'jabatan_id',
-        'divisi_id',
-        'nik',
-        'nip',
-        'gender',
-        'created_by',
-        'updated_by',
+        'nama', 
+        'email', 
+        'password', 
+        'role_id', 
+        'jabatan_id', 
+        'divisi_id', 
+        'nik', 
+        'nip', 
+        'telepon', 
+        'profile_picture', 
+
     ];
 
     /**
@@ -69,6 +66,10 @@ class User extends Authenticatable
     public function areakerja()
     {
         return $this->belongsToMany(Areakerja::class, 'team', 'karyawan_id', 'area_id');
+    }
+    public function presensi()
+    {
+        return $this->hasMany(Presensi::class, 'user_id');
     }
 
 }
