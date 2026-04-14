@@ -73,85 +73,85 @@ class AbsensiController extends Controller
         return view('absensi.index', compact('area', 'riwayat', 'stats', 'absenHariIni', 'cutiAktif'));
     }
 
-    public function store(Request $request)
-    {
-        $hariIni = now()->toDateString();
-        $jamSekarang = now();
-        
-        // --- KONFIGURASI JAM MASUK RESMI ---
-        $jamMasukResmi = Carbon::createFromTimeString('08:00:00');
-
-        // 1. CEK STATUS CUTI (Lapis Keamanan)
-        $sedangCuti = Cuti::where('karyawan_id', auth()->id())
-            ->where('status', 'disetujui')
-            ->where('tanggal_mulai', '<=', $hariIni)
-            ->where('tanggal_selesai', '>=', $hariIni)
-            ->exists();
-
-        if ($sedangCuti) {
-            return redirect()->back()->with('error', 'Gagal! Anda sedang dalam masa cuti/izin resmi.');
-        } 
-
-        // 2. VALIDASI REQUEST
-        $request->validate([
-            'area_id' => 'required',
-            'lat' => 'required|numeric',
-            'lon' => 'required|numeric',
-        ]);
-
-        $userIp = $request->ip();
-        $area = Areakerja::findOrFail($request->area_id);
-        $rawIps = $area->ip_address;
-        
-        // 3. CEK FORMAT DATA IP
-        if (is_array($rawIps)) {
-            $allowedIps = $rawIps;
-        } else {
-            $allowedIps = !empty($rawIps) ? array_map('trim', explode(',', $rawIps)) : [];
-        }
-
-        // 4. VALIDASI IP KANTOR
-        if (!empty($allowedIps) && !in_array($userIp, $allowedIps)) {
-            return redirect()->back()->with('error', 'Gagal! Gunakan Wi-Fi kantor untuk absen.');
-        }
-
-        // 5. VALIDASI GPS (GEOFENCING)
-        $jarak = $this->hitungJarak($request->lat, $request->lon, $area->latitude, $area->longitude);   
-        if ($jarak > $area->radius) {
-            return redirect()->back()->with('error', 'Gagal! Anda berada di luar radius.');
-        }
-
-        // 6. CEK DOUBLE ABSEN
-        $exists = Absensi::where('karyawan_id', auth()->id())
-            ->where('tanggal', $hariIni)
-            ->exists();
+        public function store(Request $request)
+        {
+            $hariIni = now()->toDateString();
+            $jamSekarang = now();
             
-        if($exists) {
-            return redirect()->back()->with('error', 'Anda sudah absen hari ini.');
+            // --- KONFIGURASI JAM MASUK RESMI ---
+            $jamMasukResmi = Carbon::createFromTimeString('08:00:00');
+
+            // 1. CEK STATUS CUTI (Lapis Keamanan)
+            $sedangCuti = Cuti::where('karyawan_id', auth()->id())
+                ->where('status', 'disetujui')
+                ->where('tanggal_mulai', '<=', $hariIni)
+                ->where('tanggal_selesai', '>=', $hariIni)
+                ->exists();
+
+            if ($sedangCuti) {
+                return redirect()->back()->with('error', 'Gagal! Anda sedang dalam masa cuti/izin resmi.');
+            } 
+
+            // 2. VALIDASI REQUEST
+            $request->validate([
+                'area_id' => 'required',
+                'lat' => 'required|numeric',
+                'lon' => 'required|numeric',
+            ]);
+
+            $userIp = $request->ip();
+            $area = Areakerja::findOrFail($request->area_id);
+            $rawIps = $area->ip_address;
+            
+            // 3. CEK FORMAT DATA IP
+            if (is_array($rawIps)) {
+                $allowedIps = $rawIps;
+            } else {
+                $allowedIps = !empty($rawIps) ? array_map('trim', explode(',', $rawIps)) : [];
+            }
+
+            // 4. VALIDASI IP KANTOR
+            if (!empty($allowedIps) && !in_array($userIp, $allowedIps)) {
+                return redirect()->back()->with('error', 'Gagal! Gunakan Wi-Fi kantor untuk absen.');
+            }
+
+            // 5. VALIDASI GPS (GEOFENCING)
+            $jarak = $this->hitungJarak($request->lat, $request->lon, $area->latitude, $area->longitude);   
+            if ($jarak > $area->radius) {
+                return redirect()->back()->with('error', 'Gagal! Anda berada di luar radius.');
+            }
+
+            // 6. CEK DOUBLE ABSEN
+            $exists = Absensi::where('karyawan_id', auth()->id())
+                ->where('tanggal', $hariIni)
+                ->exists();
+                
+            if($exists) {
+                return redirect()->back()->with('error', 'Anda sudah absen hari ini.');
+            }
+
+            // 7. LOGIKA KETERLAMBATAN
+            $keterangan = 'Hadir Tepat Waktu';
+            if ($jamSekarang->gt($jamMasukResmi)) {
+                $menitTelat = $jamSekarang->diffInMinutes($jamMasukResmi);
+                $keterangan = "Terlambat $menitTelat menit";
+            }
+
+            // 8. SIMPAN DATA
+            Absensi::create([
+                'karyawan_id' => auth()->id(),
+                'tanggal'     => $hariIni,
+                'jam_masuk'   => $jamSekarang->toTimeString(),
+                'status'      => 'hadir',
+                'keterangan'  => $keterangan, // Menyimpan info telat
+                'area_id'     => $request->area_id,
+                'latitude'    => $request->lat,
+                'longitude'   => $request->lon,
+                'jam_lembur'  => 0,
+            ]);
+
+            return redirect()->back()->with('success', 'Berhasil Absen Masuk. ' . $keterangan);
         }
-
-        // 7. LOGIKA KETERLAMBATAN
-        $keterangan = 'Hadir Tepat Waktu';
-        if ($jamSekarang->gt($jamMasukResmi)) {
-            $menitTelat = $jamSekarang->diffInMinutes($jamMasukResmi);
-            $keterangan = "Terlambat $menitTelat menit";
-        }
-
-        // 8. SIMPAN DATA
-        Absensi::create([
-            'karyawan_id' => auth()->id(),
-            'tanggal'     => $hariIni,
-            'jam_masuk'   => $jamSekarang->toTimeString(),
-            'status'      => 'hadir',
-            'keterangan'  => $keterangan, // Menyimpan info telat
-            'area_id'     => $request->area_id,
-            'latitude'    => $request->lat,
-            'longitude'   => $request->lon,
-            'jam_lembur'  => 0,
-        ]);
-
-        return redirect()->back()->with('success', 'Berhasil Absen Masuk. ' . $keterangan);
-    }
 
     public function update(Request $request, $id)
     {
