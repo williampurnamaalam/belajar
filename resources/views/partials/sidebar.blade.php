@@ -32,11 +32,11 @@
                     </a>
                 </li>
 
-                {{-- --- MENU KHUSUS ADMIN & HRD & MANAGER --- --}}
+                {{-- --- MENU KHUSUS ADMIN, HRD & MANAGER (KEPALA CABANG) --- --}}
                 @if(in_array(auth()->user()->role->role, ['admin', 'hrd', 'manager']))
                 
-                <li class="nav-item {{ request()->is('master-*') || request()->routeIs('karyawan*') || request()->routeIs('jabatan*') || request()->routeIs('divisi*') || request()->routeIs('role*') ? 'menu-open' : '' }}">
-                    <a href="#" class="nav-link {{ request()->is('master-*') || request()->routeIs('karyawan*') || request()->routeIs('jabatan*') || request()->routeIs('divisi*') || request()->routeIs('role*') ? 'active' : '' }}">
+                <li class="nav-item {{ request()->is('master-*') || request()->routeIs('karyawan*') || request()->routeIs('jabatan*') || request()->routeIs('divisi*') || request()->routeIs('kriteria*') || request()->routeIs('role*') ? 'menu-open' : '' }}">
+                    <a href="#" class="nav-link {{ request()->is('master-*') || request()->routeIs('karyawan*') || request()->routeIs('jabatan*') || request()->routeIs('divisi*') || request()->routeIs('kriteria*') || request()->routeIs('role*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-database"></i>
                         <p>
                             Master Data
@@ -62,6 +62,13 @@
                                 <p>Divisi</p>
                             </a>
                         </li>
+                        {{-- Menu Kriteria Diperbaiki --}}
+                        <li class="nav-item">
+                            <a href="{{ route('kriteria.index') }}" class="nav-link {{ request()->routeIs('kriteria*') ? 'active' : '' }}">
+                                <i class="fas fa-list-ol nav-icon text-primary"></i>
+                                <p>Kriteria SAW</p>
+                            </a>
+                        </li>
                         {{-- Role hanya bisa dikelola oleh Admin --}}
                         @if(auth()->user()->role->role == 'admin')
                         <li class="nav-item">
@@ -83,11 +90,33 @@
 
                 <li class="nav-header text-uppercase mt-3" style="letter-spacing: 1px; opacity: 0.6;">Operasional</li>
 
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon fas fa-wallet text-success"></i>
-                        <p>Penggajian</p>
+                {{-- MENU PENILAIAN (PENGGANTI PENGGAJIAN) --}}
+                <li class="nav-item {{ request()->is('penilaian*') ? 'menu-open' : '' }}">
+                    <a href="#" class="nav-link {{ request()->is('penilaian*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-star text-warning"></i>
+                        <p>
+                            Penilaian Kinerja
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
                     </a>
+                    <ul class="nav nav-treeview">
+                        {{-- Semua Role Pimpinan (Manager/Kepala Cabang) bisa input nilai --}}
+                        <li class="nav-item">
+                            <a href="{{ route('penilaian.input') }}" class="nav-link {{ request()->routeIs('penilaian.input') ? 'active' : '' }}">
+                                <i class="far fa-circle nav-icon text-xs text-primary"></i>
+                                <p>Input Penilaian</p>
+                            </a>
+                        </li>
+                        {{-- Hasil SAW hanya untuk HRD dan Admin --}}
+                        @if(in_array(auth()->user()->role->role, ['admin', 'hrd']))
+                        <li class="nav-item">
+                            <a href="{{ route('penilaian.ranking') }}" class="nav-link {{ request()->routeIs('penilaian.ranking') ? 'active' : '' }}">
+                                <i class="far fa-circle nav-icon text-xs text-success"></i>
+                                <p>Penilaian Akhir (Ranking)</p>
+                            </a>
+                        </li>
+                        @endif
+                    </ul>
                 </li>
 
                 <li class="nav-item">
@@ -97,8 +126,8 @@
                     </a>
                 </li>
 
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
+                <li class="nav-item {{ request()->is('admin/laporan*') ? 'menu-open' : '' }}">
+                    <a href="#" class="nav-link {{ request()->is('admin/laporan*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-clipboard-list text-secondary"></i>
                         <p>
                             Proyek & Laporan
@@ -107,28 +136,16 @@
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="#" class="nav-link">
+                            <a href="{{ route('admin.laporan.index') }}" class="nav-link {{ request()->routeIs('admin.laporan.index') ? 'active' : '' }}">
                                 <i class="far fa-circle nav-icon text-xs"></i>
-                                <p>Pesan</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="far fa-circle nav-icon text-xs"></i>
-                                <p>Laporan</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="far fa-circle nav-icon text-xs"></i>
-                                <p>Tugas</p>
+                                <p>Laporan Karyawan</p>
                             </a>
                         </li>
                     </ul>
                 </li>
 
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
+                <li class="nav-item {{ request()->is('persetujuan*') ? 'menu-open' : '' }}">
+                    <a href="#" class="nav-link {{ request()->is('persetujuan*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-file-signature text-danger"></i>
                         <p>
                             Sistem Persetujuan
@@ -143,28 +160,20 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ route('dana.admin') }}" class="nav-link {{ request()->routeIs('dana.admin') ? 'active' : '' }}" class="nav-link">
+                            <a href="{{ route('dana.admin') }}" class="nav-link {{ request()->routeIs('dana.admin') ? 'active' : '' }}">
                                 <i class="far fa-circle nav-icon text-xs text-warning"></i>
                                 <p>Dana</p>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a href="{{ route('admin.lembur.index') }}" class="nav-link {{ request()->routeIs('admin.lembur.index') ? 'active' : '' }}" class="nav-link">
-                                <i class="far fa-circle nav-icon text-xs text-success"></i>
-                                <p>Lembur</p>
-                            </a>
-                        </li>
                     </ul>
                 </li>
+                
                 <li class="nav-item">
                     <a href="{{ route('absensi') }}" class="nav-link {{ request()->routeIs('absensi*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-fingerprint text-danger"></i>
-                        <p>
-                            Absensi
-                        </p>
+                        <p>Absensi Manual</p>
                     </a>
                 </li>
-
                 @endif
 
                 {{-- --- MENU KHUSUS KARYAWAN --- --}}
@@ -199,10 +208,22 @@
                                 <p>Dana</p>
                             </a>
                         </li>
+                    </ul>
+                </li>
+                
+                <li class="nav-item {{ request()->is('laporan*') ? 'menu-open' : '' }}">
+                    <a href="#" class="nav-link {{ request()->is('laporan*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-clipboard-list text-secondary"></i>
+                        <p>
+                            Proyek & Laporan
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="{{route('lembur.index')}}" class="nav-link{{ request()->routeIs('lembur.index') ? 'active' : '' }}">
-                                <i class="far fa-circle nav-icon text-xs text-success"></i>
-                                <p>Lembur</p>
+                            <a href="{{ route('laporan.index') }}" class="nav-link {{ request()->routeIs('laporan.index') ? 'active' : '' }}">
+                                <i class="far fa-circle nav-icon text-xs"></i>
+                                <p>Kirim Laporan</p>
                             </a>
                         </li>
                     </ul>
@@ -218,7 +239,7 @@
                     </a>
                 </li>
 
-                @if(auth()->user()->role->role == 'Admin')
+                @if(auth()->user()->role->role == 'admin')
                 <li class="nav-item">
                     <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-tools text-secondary"></i>
@@ -227,15 +248,6 @@
                 </li>
                 @endif
                 
-                <li class="nav-item mt-2">
-                    <form action="{{ route('logout') }}" method="POST" id="logout-form">
-                        @csrf
-                        <a href="#" class="nav-link text-danger" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                            <i class="nav-icon fas fa-sign-out-alt"></i>
-                            <p>Keluar Aplikasi</p>
-                        </a>
-                    </form>
-                </li>
             </ul>
         </nav>
     </div>

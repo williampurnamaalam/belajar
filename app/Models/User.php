@@ -71,5 +71,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Presensi::class, 'user_id');
     }
+    public function team()
+    {
+        return $this->hasOne(Team::class, 'karyawan_id', 'id');
+    }   
 
 }
