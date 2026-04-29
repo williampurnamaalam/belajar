@@ -102,9 +102,9 @@
                         @if(!$absenHariIni)
                             <form action="{{ route('absensi.store') }}" method="POST" id="form-absen">
                                 @csrf
-                                <input type="hidden" name="area_id" value="{{ $area->id ?? '' }}">
-                                <input type="hidden" name="lat" id="lat">
-                                <input type="hidden" name="lon" id="lon">
+                                <input type="text" name="area_id" value="{{ $area->id ?? '' }}">
+                                <input type="text" name="lat" id="lat">
+                                <input type="text" name="lon" id="lon">
                                 <button type="submit" id="btn-absen" class="btn btn-primary btn-block btn-lg shadow-sm" disabled>
                                     <i class="fas fa-sign-in-alt mr-2"></i> Absen Masuk
                                 </button>

@@ -79,7 +79,7 @@ class AbsensiController extends Controller
             $jamSekarang = now();
             
             // --- KONFIGURASI JAM MASUK RESMI ---
-            $jamMasukResmi = Carbon::createFromTimeString('08:00:00');
+            $jamMasukResmi = Carbon::createFromTimeString('05:00:00');
 
             // 1. CEK STATUS CUTI (Lapis Keamanan)
             $sedangCuti = Cuti::where('karyawan_id', auth()->id())
@@ -95,7 +95,7 @@ class AbsensiController extends Controller
             // 2. VALIDASI REQUEST
             $request->validate([
                 'area_id' => 'required',
-                'lat' => 'required|numeric',
+                'lat' => 'required|numeric',    
                 'lon' => 'required|numeric',
             ]);
 

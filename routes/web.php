@@ -13,11 +13,13 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\LoginContoller;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Route::get('/', [LoginContoller::class, 'showLogin']->name('login') function () {
+//     return view('welcome');
+// });
+Route::get('/', [LoginContoller::class, 'showLogin'])->name('login');
 
-Route::get('/login', [LoginContoller::class, 'showLogin'])->name('login');
+
+// Route::get('/login', [LoginContoller::class, 'showLogin'])->name('login');
 Route::post('/login', [LoginContoller::class, 'login']);
 Route::post('/logout', [LoginContoller::class, 'logout'])->name('logout');
 
