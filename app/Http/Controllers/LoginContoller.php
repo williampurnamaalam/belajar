@@ -17,16 +17,18 @@ class LoginContoller extends Controller
     public function login(Request $request)
     {
         request()->validate([
-            'email'=>'required',
+            'telepon'=>'required',
             'password'=>'required',
         ]);
-        $credentials = $request->only('email','password');
+        $credentials = $request->only('telepon','password');
 
-        $user = User::where('email', $request->email)->first();
+        $user = User::where('username', $request->telepon)
+        ->where('username', $request->email)
+        ->first();
             if(!$user)
                 {
                     return back()->withErrors([
-                        'email'=> 'Email tidak terdaftar atau salah'
+                        'telepon'=> 'telepon tidak terdaftar atau salah'
                     ])->withInput();
                 }
             if(!Auth::validate($credentials))

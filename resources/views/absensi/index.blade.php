@@ -102,11 +102,23 @@
                         @if(!$absenHariIni)
                             <form action="{{ route('absensi.store') }}" method="POST" id="form-absen">
                                 @csrf
-                                <input type="text" name="area_id" value="{{ $area->id ?? '' }}">
-                                <input type="text" name="lat" id="lat">
-                                <input type="text" name="lon" id="lon">
-                                <button type="submit" id="btn-absen" class="btn btn-primary btn-block btn-lg shadow-sm" disabled>
-                                    <i class="fas fa-sign-in-alt mr-2"></i> Absen Masuk
+                                <input type="hidden" name="area_id" value="{{ $area->id ?? '' }}">
+                                <input type="hidden" name="lat" id="lat">
+                                <input type="hidden" name="lon" id="lon">
+                                <input type="hidden" name="image" id="photo">
+
+                       
+                                <button type="button" id="btn-start-camera" class="btn btn-primary btn-block btn-lg">
+                                    <i class="fas fa-camera mr-2"></i> Absen Hari Ini
+                                </button>
+
+                                <video id="video" width="100%" autoplay playsinline style="display:none; margin-top:10px;"></video>
+
+                            
+                                <canvas id="canvas" style="display:none;"></canvas>
+
+                                <button type="button" id="btn-capture" class="btn btn-success btn-block mt-2" style="display:none;">
+                                    📸 Ambil Foto
                                 </button>
                             </form>
                         @elseif($absenHariIni && !$absenHariIni->jam_keluar)
@@ -170,6 +182,7 @@
                                     <th class="text-center">Keluar</th>
                                     <th class="text-center">Status</th>
                                     <th>Keterangan</th>
+                                    <th>image</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -195,6 +208,8 @@
                                             <span class="text-muted">{{ $row->keterangan ?: '-' }}</span>
                                         @endif
                                     </td>
+                                    <td class="text-left"><img src="{{ asset('storage/absen/' . $row->image) }}" width="100">
+                                    </td>
                                 </tr>
                                 @empty
                                 <tr>
@@ -213,24 +228,74 @@
 
 @push('scripts')
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const latInput = document.getElementById('lat');
-        const lonInput = document.getElementById('lon');
-        const btnAbsen = document.getElementById('btn-absen');
-        const statusLocation = document.getElementById('location-status');
+document.addEventListener("DOMContentLoaded", function() {
 
-        if (statusLocation && navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function(position) {
-                if(latInput) latInput.value = position.coords.latitude;
-                if(lonInput) lonInput.value = position.coords.longitude;
-                statusLocation.classList.replace('alert-warning', 'alert-success');
-                statusLocation.innerHTML = '<i class="fas fa-check-circle mr-2"></i> Lokasi GPS Terkunci';
-                if(btnAbsen) btnAbsen.disabled = false;
-            }, function(error) {
-                statusLocation.classList.replace('alert-warning', 'alert-danger');
-                statusLocation.innerHTML = '<i class="fas fa-times-circle mr-2"></i> GPS Tidak Aktif / Ditolak';
-            }, { enableHighAccuracy: true });
+    const btnStart = document.getElementById('btn-start-camera');
+    const btnCapture = document.getElementById('btn-capture');
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const photoInput = document.getElementById('photo');
+    const form = document.getElementById('form-absen');
+
+    let stream;
+
+    // =========================
+    // GPS
+    // =========================
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            document.getElementById('lat').value = position.coords.latitude;
+            document.getElementById('lon').value = position.coords.longitude;
+        }, function() {
+            alert("GPS tidak aktif");
+        });
+    }
+
+    // =========================
+    // START CAMERA
+    // =========================
+    btnStart.addEventListener('click', async function() {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: "user" },
+                audio: false
+            });
+
+            video.srcObject = stream;
+            video.style.display = 'block';
+            btnCapture.style.display = 'block';
+            btnStart.style.display = 'none';
+
+        } catch (err) {
+            alert("Tidak bisa akses kamera");
         }
     });
+
+    // =========================
+    // CAPTURE FOTO
+    // =========================
+    btnCapture.addEventListener('click', function() {
+
+        const context = canvas.getContext('2d');
+
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Convert ke base64
+        const dataURL = canvas.toDataURL('image/jpeg');
+
+        // Simpan ke input hidden
+        photoInput.value = dataURL;
+
+        // Stop kamera
+        stream.getTracks().forEach(track => track.stop());
+
+        // Auto submit
+        form.submit();
+    });
+
+});
 </script>
 @endpush

@@ -82,7 +82,7 @@
                 <form action="/login" method="POST">
                     @csrf
                     <div class="input-group mb-3">
-                        <input type="email" class="form-control shadow-none" placeholder="Email" name="email" required autofocus />
+                        <input type="text" class="form-control shadow-none" placeholder="text" name="username" required autofocus />
                         <div class="input-group-text">
                             <span class="bi bi-envelope"></span>
                         </div>

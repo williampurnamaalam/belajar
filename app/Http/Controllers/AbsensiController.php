@@ -38,7 +38,7 @@ class AbsensiController extends Controller
             ->whereYear('tanggal', $tahunIni)
             ->orderBy('tanggal', 'desc')
             ->get();
-
+        // return $riwayat;
         // 4. HITUNG TOTAL HARI CUTI/IZIN BULAN INI
         $dataCutiBulanIni = Cuti::where('karyawan_id', $user->id)
             ->where('status', 'disetujui')
@@ -73,85 +73,66 @@ class AbsensiController extends Controller
         return view('absensi.index', compact('area', 'riwayat', 'stats', 'absenHariIni', 'cutiAktif'));
     }
 
-        public function store(Request $request)
-        {
-            $hariIni = now()->toDateString();
-            $jamSekarang = now();
-            
-            // --- KONFIGURASI JAM MASUK RESMI ---
-            $jamMasukResmi = Carbon::createFromTimeString('05:00:00');
+       public function store(Request $request)
+    {
+        $hariIni = now()->toDateString();
+        $jamSekarang = now();
+        $jamMasukResmi = \Carbon\Carbon::createFromTimeString('05:00:00');
 
-            // 1. CEK STATUS CUTI (Lapis Keamanan)
-            $sedangCuti = Cuti::where('karyawan_id', auth()->id())
-                ->where('status', 'disetujui')
-                ->where('tanggal_mulai', '<=', $hariIni)
-                ->where('tanggal_selesai', '>=', $hariIni)
-                ->exists();
+    
+        $request->validate([
+            'area_id' => 'required',
+            'lat'     => 'required|numeric',
+            'lon'     => 'required|numeric',
+            'image'   => 'required|string'
+        ]);
 
-            if ($sedangCuti) {
-                return redirect()->back()->with('error', 'Gagal! Anda sedang dalam masa cuti/izin resmi.');
-            } 
+     
+        $image = $request->image;
 
-            // 2. VALIDASI REQUEST
-            $request->validate([
-                'area_id' => 'required',
-                'lat' => 'required|numeric',    
-                'lon' => 'required|numeric',
-            ]);
+        $image = str_replace('data:image/jpeg;base64,', '', $image);
+        $image = str_replace(' ', '+', $image);
 
-            $userIp = $request->ip();
-            $area = Areakerja::findOrFail($request->area_id);
-            $rawIps = $area->ip_address;
-            
-            // 3. CEK FORMAT DATA IP
-            if (is_array($rawIps)) {
-                $allowedIps = $rawIps;
-            } else {
-                $allowedIps = !empty($rawIps) ? array_map('trim', explode(',', $rawIps)) : [];
-            }
+        $imageName = 'absen_' . time() . '.jpg';
 
-            // 4. VALIDASI IP KANTOR
-            if (!empty($allowedIps) && !in_array($userIp, $allowedIps)) {
-                return redirect()->back()->with('error', 'Gagal! Gunakan Wi-Fi kantor untuk absen.');
-            }
+        \Storage::disk('public')->put('absen/' . $imageName, base64_decode($image));
 
-            // 5. VALIDASI GPS (GEOFENCING)
-            $jarak = $this->hitungJarak($request->lat, $request->lon, $area->latitude, $area->longitude);   
-            if ($jarak > $area->radius) {
-                return redirect()->back()->with('error', 'Gagal! Anda berada di luar radius.');
-            }
+        $exists = Absensi::where('karyawan_id', auth()->id())
+            ->where('tanggal', $hariIni)
+            ->exists();
 
-            // 6. CEK DOUBLE ABSEN
-            $exists = Absensi::where('karyawan_id', auth()->id())
-                ->where('tanggal', $hariIni)
-                ->exists();
-                
-            if($exists) {
-                return redirect()->back()->with('error', 'Anda sudah absen hari ini.');
-            }
-
-            // 7. LOGIKA KETERLAMBATAN
-            $keterangan = 'Hadir Tepat Waktu';
-            if ($jamSekarang->gt($jamMasukResmi)) {
-                $menitTelat = $jamSekarang->diffInMinutes($jamMasukResmi);
-                $keterangan = "Terlambat $menitTelat menit";
-            }
-
-            // 8. SIMPAN DATA
-            Absensi::create([
-                'karyawan_id' => auth()->id(),
-                'tanggal'     => $hariIni,
-                'jam_masuk'   => $jamSekarang->toTimeString(),
-                'status'      => 'hadir',
-                'keterangan'  => $keterangan, // Menyimpan info telat
-                'area_id'     => $request->area_id,
-                'latitude'    => $request->lat,
-                'longitude'   => $request->lon,
-                'jam_lembur'  => 0,
-            ]);
-
-            return redirect()->back()->with('success', 'Berhasil Absen Masuk. ' . $keterangan);
+        if ($exists) {
+            return redirect()->back()->with('error', 'Anda sudah absen hari ini.');
         }
+
+        $keterangan = 'Hadir Tepat Waktu';
+
+        if ($jamSekarang->gt($jamMasukResmi)) {
+            $menitTelat = $jamSekarang->diffInMinutes($jamMasukResmi);
+            $keterangan = "Terlambat $menitTelat menit";
+        }
+
+        // =========================
+        // SIMPAN DB
+        // =========================
+        Absensi::create([
+            'karyawan_id' => auth()->id(),
+            'tanggal'     => $hariIni,
+            'jam_masuk'   => $jamSekarang->toTimeString(),
+            'status'      => 'hadir',
+            'keterangan'  => $keterangan,
+            'area_id'     => $request->area_id,
+            'latitude'    => $request->lat,
+            'longitude'   => $request->lon,
+            'jam_lembur'  => 0,
+            'image'       => $imageName
+        ]);
+
+      
+        // dd($request->all());
+
+        return redirect()->back()->with('success', 'Berhasil Absen Masuk. ' . $keterangan);
+    }
 
     public function update(Request $request, $id)
     {
