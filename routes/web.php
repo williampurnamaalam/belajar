@@ -7,6 +7,7 @@ use App\Http\Controllers\DanaController;
 use App\Http\Controllers\DivisiController;
 use App\Http\Controllers\JabatanController;
 use App\Http\Controllers\KaryawanController;
+use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\LemburController;
 use App\Http\Controllers\PresensiController;
 use App\Http\Controllers\RoleController;
@@ -43,6 +44,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/pengajuan-lembur', [LemburController::class, 'index'])->name('lembur.index');
     Route::post('/pengajuan-lembur', [LemburController::class, 'store'])->name('lembur.store');
 
+    // 5.laporan
+    Route::get('/laporan-tugas', [LaporanController::class, 'index'])->name('laporan.index');
+    Route::post('/laporan-tugas', [LaporanController::class, 'store'])->name('laporan.store');
+    Route::delete('/laporan/{id}', [LaporanController::class, 'destroy'])->name('laporan.destroy');
 
     // --------------------------------------------------------------------
     // 3. KHUSUS ADMIN, HRD, & MANAGER (Master Data & Approval)
@@ -53,8 +58,6 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('karyawan', KaryawanController::class);
         Route::get('/karyawan',[ KaryawanController::class,'index'])->name('karyawan');
         Route::post('/karyawan/tambah', [KaryawanController::class, 'store'])->name('tambah_karyawan');
-
-        
 
         // Jabatan & Divisi
         Route::resource('jabatan', JabatanController::class);
@@ -89,6 +92,16 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/presensi', [PresensiController::class, 'index'])->name('presensi.index');
         Route::get('/area/{area_id}', [PresensiController::class, 'daftarKaryawan'])->name('presensi.karyawan');
         Route::get('/detail/{user_id}', [PresensiController::class, 'detailKaryawan'])->name('presensi.detail');
+
+        // laporan
+        Route::get('/admin/monitoring-tugas', [LaporanController::class, 'adminIndex'])->name('admin.laporan.index');
+        Route::get('/admin/laporan/cetak', [LaporanController::class, 'cetakLaporan'])->name('admin.laporan.cetak');
+        // kriteria
+        Route::resource('kriteria', \App\Http\Controllers\KriteriaController::class);
+        // penilaian
+        Route::get('/penilaian/input', [\App\Http\Controllers\PenilaianController::class, 'inputNilai'])->name('penilaian.input');
+        Route::post('/penilaian/store', [\App\Http\Controllers\PenilaianController::class, 'storeNilai'])->name('penilaian.store');
+        Route::get('/penilaian/ranking', [\App\Http\Controllers\PenilaianController::class, 'hasilRanking'])->name('penilaian.ranking');
         });
 
     });

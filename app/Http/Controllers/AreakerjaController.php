@@ -10,7 +10,6 @@ class AreakerjaController extends Controller
 {
     public function index()
     {
-
         $areakerjas = Areakerja::latest()->get();
         return view('areakerja.index', compact('areakerjas'));
     }
@@ -23,7 +22,6 @@ class AreakerjaController extends Controller
 
     public function store(Request $request)
     {
-        dd($request->all());
         $request->validate([
             'lokasi'     => 'required|string|max:255',
             'ip_address' => 'required', 
@@ -32,7 +30,6 @@ class AreakerjaController extends Controller
             'radius'     => 'required|numeric',
         ]);
 
-       
         $ips = array_map('trim', explode(',', $request->ip_address));
 
         Areakerja::create([
@@ -84,16 +81,21 @@ class AreakerjaController extends Controller
         return redirect()->route('areakerja')->with('success', 'Area kerja berhasil dihapus.');
     }
 
-    
     public function insert($id)
     {
         $area = Areakerja::findOrFail($id);
-        $karyawans = User::with(['jabatan', 'divisi'])->get();
+        $karyawans = User::with(['jabatan', 'divisi'])
+            ->whereNotIn('id', function($query) use ($id) {
+                $query->select('karyawan_id')
+                      ->from('team')
+                      ->where('area_id', '!=', $id);
+            })
+            ->get();
+
         $currentTeamIds = $area->karyawans->pluck('id')->toArray();
         return view('areakerja.insert', compact('area', 'karyawans', 'currentTeamIds'));
     }
 
-    
     public function storeTeam(Request $request, $id)
     {
         $area = Areakerja::findOrFail($id);
