@@ -114,7 +114,7 @@
 
                                 <video id="video" width="100%" autoplay playsinline style="display:none; margin-top:10px;"></video>
 
-                            
+                                
                                 <canvas id="canvas" style="display:none;"></canvas>
 
                                 <button type="button" id="btn-capture" class="btn btn-success btn-block mt-2" style="display:none;">
@@ -132,20 +132,35 @@
                                 $bolehPulang = $selisihMenit >= $jedaMenit;
                                 $sisaMenit = $jedaMenit - $selisihMenit;
                             @endphp
-                            <form action="{{ route('absensi.update', $absenHariIni->id) }}" method="POST">
-                                @csrf @method('PUT')
+                            <form action="{{ route('absensi.update', $absenHariIni->id) }}" method="POST" id="form-pulang">
+                                @csrf 
+                                @method('PUT')
+
                                 <input type="hidden" name="lat" id="lat">
                                 <input type="hidden" name="lon" id="lon">
-                                
+                                <input type="hidden" name="image_out" id="photo-pulang">
+
+                                <!-- BUTTON START CAMERA -->
                                 @if($bolehPulang)
-                                    <button type="submit" id="btn-absen" class="btn btn-danger btn-block btn-lg shadow-sm" disabled>
+                                    <button type="button" id="btn-start-camera-pulang" class="btn btn-danger btn-block btn-lg">
                                         <i class="fas fa-sign-out-alt mr-2"></i> Absen Pulang
                                     </button>
                                 @else
-                                    <button type="button" class="btn btn-secondary btn-block btn-lg shadow-sm" disabled>
-                                        <i class="fas fa-hourglass-half mr-2"></i> Jeda Pulang ({{ $sisaMenit }}m lagi)
+                                    <button type="button" class="btn btn-secondary btn-block btn-lg" disabled>
+                                        Jeda Pulang ({{ $sisaMenit }}m lagi)
                                     </button>
                                 @endif
+
+                                <!-- VIDEO -->
+                                <video id="video-pulang" width="100%" autoplay playsinline style="display:none; margin-top:10px;"></video>
+
+                                <!-- CANVAS -->
+                                <canvas id="canvas-pulang" style="display:none;"></canvas>
+
+                                <!-- CAPTURE -->
+                                <button type="button" id="btn-capture-pulang" class="btn btn-success btn-block mt-2" style="display:none;">
+                                    📸 Ambil Foto Pulang
+                                </button>
                             </form>
                         @else
                             <div class="alert alert-info py-2 small mb-3">
@@ -297,5 +312,57 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
 });
+
+const btnStartPulang = document.getElementById('btn-start-camera-pulang');
+const btnCapturePulang = document.getElementById('btn-capture-pulang');
+const videoPulang = document.getElementById('video-pulang');
+const canvasPulang = document.getElementById('canvas-pulang');
+const photoPulang = document.getElementById('photo-pulang');
+const formPulang = document.getElementById('form-pulang');
+
+let streamPulang;
+
+// START CAMERA PULANG
+if (btnStartPulang) {
+    btnStartPulang.addEventListener('click', async function() {
+        try {
+            streamPulang = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: "user" },
+                audio: false
+            });
+
+            videoPulang.srcObject = streamPulang;
+            videoPulang.style.display = 'block';
+            btnCapturePulang.style.display = 'block';
+            btnStartPulang.style.display = 'none';
+
+        } catch (err) {
+            alert("Tidak bisa akses kamera");
+        }
+    });
+}
+
+// CAPTURE PULANG
+if (btnCapturePulang) {
+    btnCapturePulang.addEventListener('click', function() {
+
+        const context = canvasPulang.getContext('2d');
+
+        canvasPulang.width = videoPulang.videoWidth;
+        canvasPulang.height = videoPulang.videoHeight;
+
+        context.drawImage(videoPulang, 0, 0, canvasPulang.width, canvasPulang.height);
+
+        const dataURL = canvasPulang.toDataURL('image/jpeg', 0.7);
+
+        photoPulang.value = dataURL;
+
+        // stop kamera
+        streamPulang.getTracks().forEach(track => track.stop());
+
+        // submit
+        formPulang.submit();
+    });
+}
 </script>
 @endpush

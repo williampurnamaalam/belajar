@@ -20,7 +20,8 @@ class Absensi extends Model
         'area_id',
         'jam_lembur',
         'keterangan',
-        'image'
+        'image',
+        'image_out'
     ];
  
     protected $casts = [

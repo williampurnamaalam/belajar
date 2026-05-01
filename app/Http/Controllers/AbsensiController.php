@@ -144,6 +144,7 @@ class AbsensiController extends Controller
         $absensi = Absensi::findOrFail($id);
         $hariIni = $absensi->tanggal;
         $waktuSekarang = now();
+        $image_out = $request->input('image_out');
 
         // 1. Logika Jeda Waktu (Cooldown)
         $jedaMenit = 10; 
@@ -170,9 +171,25 @@ class AbsensiController extends Controller
             return redirect()->back()->with('error', 'Anda di luar radius.');
         }
 
+        $imageName = null;
+
+        if ($image_out) {
+            preg_match("/data:image\/(.*?);base64/", $image_out, $imageType);
+            $extension = $imageType[1] ?? 'jpg';
+
+            $image_out = preg_replace('/^data:image\/\w+;base64,/', '', $image_out);
+            $image_out = str_replace(' ', '+', $image_out);
+
+            $imageName = 'pulang_' . time() . '.' . $extension;
+
+            \Storage::disk('public')->put('absen/' . $imageName, base64_decode($image_out));
+        }
+
         // 3. Update Jam Keluar
         $absensi->update([
             'jam_keluar' => $waktuSekarang->toTimeString(),
+            'image_out'=>   $imageName,
+
         ]);
 
         // 4. Logika Hitung Lembur
