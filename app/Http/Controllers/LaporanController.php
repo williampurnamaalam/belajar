@@ -48,14 +48,16 @@ class LaporanController extends Controller
 
     public function destroy($id)
     {   
-    $data = Laporan::findOrFail($id);
-    if ($data->file_bukti) {
-        \Storage::delete('public/laporan_tugas/' . $data->file);
-    }
+        $data = Laporan::findOrFail($id);
+        
+        // Ganti file_bukti menjadi file agar sesuai kolom database saat hapus data
+        if ($data->file) {
+            Storage::delete('public/laporan_tugas/' . $data->file);
+        }
 
-    $data->delete();
+        $data->delete();
 
-    return redirect()->back()->with('success', 'Laporan berhasil dihapus!');
+        return redirect()->back()->with('success', 'Laporan berhasil dihapus!');
     }
 
     public function adminIndex()
@@ -63,6 +65,18 @@ class LaporanController extends Controller
         $daftarLaporan = Laporan::with('user')->orderBy('created_at', 'desc')->get();
         $karyawans = User::where('role_id', 2)->get();
         return view('laporan.list', compact('daftarLaporan', 'karyawans'));
+    }
+
+    /**
+     * FUNGSI BARU: Menampilkan Halaman Detail Per Laporan
+     */
+    public function show($id)
+    {
+        // Mengambil data laporan spesifik beserta data user/karyawannya
+        $laporan = Laporan::with('user')->findOrFail($id);
+        
+        // Mengarahkan ke file resources/views/laporan/show.blade.php
+        return view('laporan.show', compact('laporan'));
     }
 
     public function cetakLaporan(Request $request)

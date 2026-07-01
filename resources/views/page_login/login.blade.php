@@ -7,7 +7,7 @@
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/source-sans-3@5.0.12/index.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
-    <link rel="stylesheet" href="{{asset('adminlte/css/adminlte.css')}}" />
+    <link rel="stylesheet" href="{{ asset('adminlte/css/adminlte.css') }}" />
 
     <style>
         body.login-page {
@@ -37,11 +37,9 @@
         }
         .input-group-text {
             background-color: transparent;
-            border-left: none;
             color: #adb5bd;
         }
         .form-control {
-            border-right: none;
             padding: 12px;
             border-radius: 8px 0 0 8px;
         }
@@ -49,17 +47,25 @@
             box-shadow: none;
             border-color: #dee2e6;
         }
-        .form-control:focus + .input-group-text {
-            border-color: #dee2e6;
+        
+        /* Teks peringatan disembunyikan secara default */
+        .invalid-feedback {
+            display: none;
         }
-        .social-auth-links .btn {
-            border-radius: 8px;
-            font-size: 0.9rem;
+        
+        /* Hanya tampilkan peringatan "harus diisi" jika form disubmit dalam keadaan kosong */
+        .was-validated .form-control:invalid ~ .invalid-feedback {
+            display: block;
+        }
+        
+        /* Efek visual warna border merah pada ikon di kanan input jika kosong */
+        .was-validated .form-control:invalid + .input-group-text {
+            border-color: #dc3545 !important;
         }
     </style>
 </head>
 
-<body class="login-page">
+<body class="login-page d-flex align-items-center justify-content-center">
     <div class="login-box text-center">
         <div class="login-logo mb-4">
             <a href="#" class="text-decoration-none">
@@ -72,39 +78,84 @@
             <div class="card-body login-card-body p-4">
                 <h5 class="text-dark font-weight-bold mb-1">Selamat Datang</h5>
                 <p class="text-muted small mb-4">Silakan masuk ke akun Anda</p>
-                @if(session('error'))
+                
+                {{-- ALERT UTAMA: Menampilkan error "Password salah" atau "Email tidak terdaftar" dari LoginController --}}
+                @if($errors->any())
                 <div class="alert alert-danger alert-dismissible fade show text-start py-2" role="alert">
-                    <small><i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}</small>
+                    <small>
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i> 
+                        {{ $errors->first() }}
+                    </small>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
                 @endif
 
-                <form action="/login" method="POST">
+                {{-- Ditambahkan otomatis class 'was-validated' lewat blade jika ada error dari server --}}
+                <form action="/login" method="POST" class="needs-validation @if($errors->any()) was-validated @endif" novalidate>
                     @csrf
-                    <div class="input-group mb-3">
-                        <input type="email" class="form-control shadow-none" placeholder="Email" name="email" required autofocus />
-                        <div class="input-group-text">
-                            <span class="bi bi-envelope"></span>
+                    
+                    {{-- FIELD EMAIL --}}
+                    <div class="mb-3 text-start">
+                        <div class="input-group">
+                            <input type="email" class="form-control shadow-none" 
+                                   placeholder="Email" name="email" value="{{ old('email') }}" required autofocus />
+                            <div class="input-group-text">
+                                <span class="bi bi-envelope"></span>
+                            </div>
+                            <div class="invalid-feedback">
+                                Field email harus diisi dengan benar.
+                            </div>
                         </div>
                     </div>
 
-                    <div class="input-group mb-3">
-                        <input type="password" class="form-control shadow-none" placeholder="Password" name="password" required />
-                        <div class="input-group-text">
-                            <span class="bi bi-lock-fill"></span>
+                    {{-- FIELD PASSWORD --}}
+                    <div class="mb-4 text-start">
+                        <div class="input-group">
+                            <input type="password" class="form-control shadow-none" 
+                                   placeholder="Password" name="password" required />
+                            <div class="input-group-text">
+                                <span class="bi bi-lock-fill"></span>
+                            </div>
+                            <div class="invalid-feedback">
+                                Field password harus diisi.
+                            </div>
                         </div>
                     </div>
+
+                    {{-- BUTTON SUBMIT --}}
                     <div class="d-grid mb-3">
                         <button type="submit" class="btn btn-primary shadow-sm">
                             Masuk Ke Sistem
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+        
         <p class="mt-4 text-muted small">&copy; 2026 SDM SISTEM</p>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
-    <script src="{{asset('adminlte/js/adminlte.js')}}"></script>
+    <script src="{{ asset('adminlte/js/adminlte.js') }}"></script>
+
+    <script>
+        (() => {
+            'use strict'
+            const forms = document.querySelectorAll('.needs-validation')
+
+            Array.from(forms).forEach(form => {
+                form.addEventListener('submit', event => {
+                    // Setiap kali tombol login ditekan, pasang class 'was-validated' secara paksa
+                    form.classList.add('was-validated')
+                    
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                }, false)
+            })
+        })()
+    </script>
 </body>
 </html>

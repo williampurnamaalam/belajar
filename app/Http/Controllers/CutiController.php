@@ -47,20 +47,30 @@ class CutiController extends Controller
 
     public function approveReject(Request $request, $id)
     {
-        // VALIDASI KEAMANAN: Pastikan status hanya bisa diisi disetujui atau ditolak
+        
+        if ($request->has('status')) {
+            $request->merge(['status' => strtolower($request->status)]);
+        }
+
         $request->validate([
-            'status' => ['required', Rule::in(['disetujui', 'ditolak'])],
+            'status' => ['required', Rule::in(['pending', 'disetujui', 'ditolak'])],
             'catatan_admin' => 'nullable|string|max:255'
         ]);
 
         $cuti = Cuti::findOrFail($id);
+        
+  
+        if ($cuti->karyawan_id == auth()->id()) {
+            return redirect()->back()->with('error', 'Anda tidak diperbolehkan menyetujui atau menolak pengajuan cuti Anda sendiri!');
+            
+        }
         
         $cuti->update([
             'status' => $request->status,
             'catatan_admin' => $request->catatan_admin,
         ]);
 
-        $pesan = $request->status == 'disetujui' ? 'Pengajuan disetujui!' : 'Pengajuan ditolak!';
+        $pesan = $request->status == 'disetujui' ? 'Pengajuan cuti disetujui!' : ($request->status == 'pending' ? 'Pengajuan dikembalikan ke pending.' : 'Pengajuan cuti ditolak!');
         return redirect()->back()->with('success', $pesan);
     }
 }

@@ -133,8 +133,7 @@
                     <hr class="border-white opacity-25">
                     <p class="mb-1 small text-white-50">Nama Area:</p>
                     <p class="h5">{{ $area->lokasi }}</p>
-                    <p class="mb-1 mt-3 small text-white-50">Keterangan:</p>
-                    <p class="mb-0 small italic">{{ $area->detail ?? 'Tidak ada detail tambahan.' }}</p>
+                    
                 </div>
             </div>
         </div>

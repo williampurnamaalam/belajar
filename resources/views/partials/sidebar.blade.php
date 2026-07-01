@@ -1,14 +1,14 @@
 <aside class="main-sidebar sidebar-dark-primary elevation-4 text-sm">
     <a href="{{ route('dashboard') }}" class="brand-link border-bottom border-secondary">
         <img src="https://adminlte.io/docs/3.2/assets/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
-        <span class="brand-text font-weight-light ml-2">HRIS <span class="font-weight-bold">SYSTEM</span></span>
+        <span class="brand-text font-weight-light ml-2">HRS <span class="font-weight-bold">SYSTEM</span></span>
     </a>
 
     <div class="sidebar">
         <div class="user-panel mt-3 pb-3 mb-3 d-flex border-bottom border-secondary align-items-center">
             <div class="image">
                 <img src="{{ auth()->user()->profile_picture ? asset('storage/' . auth()->user()->profile_picture) : 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->nama) . '&background=0D8ABC&color=fff' }}" 
-                     class="img-circle elevation-2" 
+                     class="img-circle elevation-2"     
                      alt="User Image"
                      style="width: 35px; height: 35px; object-fit: cover;">
             </div>
@@ -25,6 +25,7 @@
                 
                 <li class="nav-header text-uppercase" style="letter-spacing: 1px; opacity: 0.6;">Menu Utama</li>
                 
+                {{-- DASHBOARD: Diakses oleh Semua Role --}}
                 <li class="nav-item">
                     <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-tachometer-alt text-primary"></i>
@@ -32,11 +33,10 @@
                     </a>
                 </li>
 
-                {{-- --- MENU KHUSUS ADMIN, HRD & MANAGER (KEPALA CABANG) --- --}}
-                @if(in_array(auth()->user()->role->role, ['admin', 'hrd', 'manager']))
-                
-                <li class="nav-item {{ request()->is('master-*') || request()->routeIs('karyawan*') || request()->routeIs('jabatan*') || request()->routeIs('divisi*') || request()->routeIs('kriteria*') || request()->routeIs('role*') ? 'menu-open' : '' }}">
-                    <a href="#" class="nav-link {{ request()->is('master-*') || request()->routeIs('karyawan*') || request()->routeIs('jabatan*') || request()->routeIs('divisi*') || request()->routeIs('kriteria*') || request()->routeIs('role*') ? 'active' : '' }}">
+                {{-- MASTER DATA: Hanya diakses oleh Admin & HRD --}}
+                @if(in_array(auth()->user()->role->role, ['admin', 'hrd']))
+                <li class="nav-item {{ request()->routeIs('karyawan*') || request()->routeIs('jabatan*') || request()->routeIs('divisi*') || request()->routeIs('kriteria*') || request()->routeIs('role*') ? 'menu-open' : '' }}">
+                    <a href="#" class="nav-link {{ request()->routeIs('karyawan*') || request()->routeIs('jabatan*') || request()->routeIs('divisi*') || request()->routeIs('kriteria*') || request()->routeIs('role*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-database"></i>
                         <p>
                             Master Data
@@ -45,34 +45,33 @@
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="{{ route('karyawan') }}" class="nav-link {{ request()->routeIs('karyawan') ? 'active' : '' }}">
+                            <a href="{{ route('karyawan') }}" class="nav-link {{ request()->routeIs('karyawan*') ? 'active' : '' }}">
                                 <i class="fas fa-users nav-icon text-info"></i>
                                 <p>Data Karyawan</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ route('jabatan') }}" class="nav-link {{ request()->routeIs('jabatan') ? 'active' : '' }}">
+                            <a href="{{ route('jabatan') }}" class="nav-link {{ request()->routeIs('jabatan*') ? 'active' : '' }}">
                                 <i class="fas fa-briefcase nav-icon text-warning"></i>
                                 <p>Jabatan</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ route('divisi') }}" class="nav-link {{ request()->routeIs('divisi') ? 'active' : '' }}">
+                            <a href="{{ route('divisi') }}" class="nav-link {{ request()->routeIs('divisi*') ? 'active' : '' }}">
                                 <i class="fas fa-sitemap nav-icon text-danger"></i>
                                 <p>Divisi</p>
                             </a>
                         </li>
-                        {{-- Menu Kriteria Diperbaiki --}}
                         <li class="nav-item">
                             <a href="{{ route('kriteria.index') }}" class="nav-link {{ request()->routeIs('kriteria*') ? 'active' : '' }}">
                                 <i class="fas fa-list-ol nav-icon text-primary"></i>
                                 <p>Kriteria SAW</p>
                             </a>
                         </li>
-                        {{-- Role hanya bisa dikelola oleh Admin --}}
+                        {{-- Role & Hak Akses: Hanya Admin --}}
                         @if(auth()->user()->role->role == 'admin')
                         <li class="nav-item">
-                            <a href="{{ route('role') }}" class="nav-link {{ request()->routeIs('role') ? 'active' : '' }}">
+                            <a href="{{ route('role') }}" class="nav-link {{ request()->routeIs('role*') ? 'active' : '' }}">
                                 <i class="fas fa-user-shield nav-icon text-success"></i>
                                 <p>Role & Hak Akses</p>
                             </a>
@@ -80,19 +79,24 @@
                         @endif
                     </ul>
                 </li>
+                @endif
 
+                {{-- AREA KERJA: Hanya diakses oleh Admin & HRD --}}
+                @if(in_array(auth()->user()->role->role, ['admin', 'hrd']))
                 <li class="nav-item">
-                   <a href="{{ route('areakerja') }}" class="nav-link {{ request()->routeIs('areakerja') ? 'active' : '' }}">
+                   <a href="{{ route('areakerja') }}" class="nav-link {{ request()->routeIs('areakerja*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-map-marker-alt text-orange"></i>
                         <p>Area Kerja</p>
                     </a>
                 </li>
+                @endif
 
                 <li class="nav-header text-uppercase mt-3" style="letter-spacing: 1px; opacity: 0.6;">Operasional</li>
 
-                {{-- MENU PENILAIAN (PENGGANTI PENGGAJIAN) --}}
-                <li class="nav-item {{ request()->is('penilaian*') ? 'menu-open' : '' }}">
-                    <a href="#" class="nav-link {{ request()->is('penilaian*') ? 'active' : '' }}">
+                {{-- PENILAIAN KINERJA: Admin, HRD, Manager, Kepala Cabang --}}
+                @if(in_array(auth()->user()->role->role, ['admin', 'hrd', 'manager', 'kepala cabang']))
+                <li class="nav-item {{ request()->routeIs('penilaian*') ? 'menu-open' : '' }}">
+                    <a href="#" class="nav-link {{ request()->routeIs('penilaian*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-star text-warning"></i>
                         <p>
                             Penilaian Kinerja
@@ -100,14 +104,17 @@
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
-                        {{-- Semua Role Pimpinan (Manager/Kepala Cabang) bisa input nilai --}}
+                        {{-- Input Penilaian: Admin, Manager, Kepala Cabang --}}
+                        @if(in_array(auth()->user()->role->role, ['admin', 'manager', 'kepala cabang']))
                         <li class="nav-item">
                             <a href="{{ route('penilaian.input') }}" class="nav-link {{ request()->routeIs('penilaian.input') ? 'active' : '' }}">
                                 <i class="far fa-circle nav-icon text-xs text-primary"></i>
                                 <p>Input Penilaian</p>
                             </a>
                         </li>
-                        {{-- Hasil SAW hanya untuk HRD dan Admin --}}
+                        @endif
+                        
+                        {{-- Hasil Akhir Ranking SAW: Admin & HRD --}}
                         @if(in_array(auth()->user()->role->role, ['admin', 'hrd']))
                         <li class="nav-item">
                             <a href="{{ route('penilaian.ranking') }}" class="nav-link {{ request()->routeIs('penilaian.ranking') ? 'active' : '' }}">
@@ -118,16 +125,22 @@
                         @endif
                     </ul>
                 </li>
+                @endif
 
+                {{-- DATA PRESENSI: Admin, HRD, Manager, Kepala Cabang --}}
+                @if(in_array(auth()->user()->role->role, ['admin', 'hrd', 'manager', 'kepala cabang']))
                 <li class="nav-item">
-                    <a href="{{ route('presensi.index') }}" class="nav-link {{ request()->is('presensi*') ? 'active' : '' }}">
+                    <a href="{{ route('presensi.index') }}" class="nav-link {{ request()->routeIs('presensi.*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-clock text-info"></i>
                         <p>Data Presensi</p>
                     </a>
                 </li>
+                @endif
 
-                <li class="nav-item {{ request()->is('admin/laporan*') ? 'menu-open' : '' }}">
-                    <a href="#" class="nav-link {{ request()->is('admin/laporan*') ? 'active' : '' }}">
+                {{-- PROYEK & LAPORAN --}}
+                @if(in_array(auth()->user()->role->role, ['admin', 'hrd', 'manager', 'kepala cabang', 'karyawan']))
+                <li class="nav-item {{ request()->routeIs('admin.laporan*') || request()->routeIs('laporan*') ? 'menu-open' : '' }}">
+                    <a href="#" class="nav-link {{ request()->routeIs('admin.laporan*') || request()->routeIs('laporan*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-clipboard-list text-secondary"></i>
                         <p>
                             Proyek & Laporan
@@ -135,110 +148,96 @@
                         </p>
                     </a>
                     <ul class="nav nav-treeview">
+                        {{-- Sisi Management (Melihat Laporan): Admin, Manager, Kepala Cabang --}}
+                        @if(in_array(auth()->user()->role->role, ['admin', 'hrd','manager', 'kepala cabang']))
                         <li class="nav-item">
                             <a href="{{ route('admin.laporan.index') }}" class="nav-link {{ request()->routeIs('admin.laporan.index') ? 'active' : '' }}">
-                                <i class="far fa-circle nav-icon text-xs"></i>
+                                <i class="far fa-circle nav-icon text-xs text-info"></i>
                                 <p>Laporan Karyawan</p>
                             </a>
                         </li>
-                    </ul>
-                </li>
+                        @endif
 
-                <li class="nav-item {{ request()->is('persetujuan*') ? 'menu-open' : '' }}">
-                    <a href="#" class="nav-link {{ request()->is('persetujuan*') ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-file-signature text-danger"></i>
-                        <p>
-                            Sistem Persetujuan
-                            <i class="right fas fa-angle-left"></i>
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item">
-                            <a href="{{ route('cuti.admin') }}" class="nav-link {{ request()->routeIs('cuti.admin') ? 'active' : '' }}">
-                                <i class="far fa-circle nav-icon text-xs text-info"></i>
-                                <p>Cuti</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('dana.admin') }}" class="nav-link {{ request()->routeIs('dana.admin') ? 'active' : '' }}">
-                                <i class="far fa-circle nav-icon text-xs text-warning"></i>
-                                <p>Dana</p>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-                
-                <li class="nav-item">
-                    <a href="{{ route('absensi') }}" class="nav-link {{ request()->routeIs('absensi*') ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-fingerprint text-danger"></i>
-                        <p>Absensi Manual</p>
-                    </a>
-                </li>
-                @endif
-
-                {{-- --- MENU KHUSUS KARYAWAN --- --}}
-                @if(auth()->user()->role->role == 'karyawan')
-                <li class="nav-header text-uppercase mt-3" style="letter-spacing: 1px; opacity: 0.6;">Layanan Mandiri</li>
-
-                <li class="nav-item">
-                    <a href="{{ route('absensi') }}" class="nav-link {{ request()->routeIs('absensi*') ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-fingerprint text-danger"></i>
-                        <p>Absensi Saya</p>
-                    </a>
-                </li>
-
-                <li class="nav-item {{ request()->is('persetujuan/*') ? 'menu-open' : '' }}">
-                    <a href="#" class="nav-link {{ request()->is('persetujuan/*') ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-file-signature text-warning"></i>
-                        <p>
-                            Pengajuan Saya
-                            <i class="right fas fa-angle-left"></i>
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item">
-                            <a href="{{ route('cuti.index') }}" class="nav-link {{ request()->routeIs('cuti.index') ? 'active' : '' }}">
-                                <i class="far fa-circle nav-icon text-xs text-info"></i>
-                                <p>Cuti</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#" class="nav-link">
-                                <i class="far fa-circle nav-icon text-xs text-warning"></i>
-                                <p>Dana</p>
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-                
-                <li class="nav-item {{ request()->is('laporan*') ? 'menu-open' : '' }}">
-                    <a href="#" class="nav-link {{ request()->is('laporan*') ? 'active' : '' }}">
-                        <i class="nav-icon fas fa-clipboard-list text-secondary"></i>
-                        <p>
-                            Proyek & Laporan
-                            <i class="right fas fa-angle-left"></i>
-                        </p>
-                    </a>
-                    <ul class="nav nav-treeview">
+                        {{-- Sisi Karyawan (Kirim Laporan): Admin & Karyawan --}}
+                        @if(in_array(auth()->user()->role->role, ['admin', 'karyawan']))
                         <li class="nav-item">
                             <a href="{{ route('laporan.index') }}" class="nav-link {{ request()->routeIs('laporan.index') ? 'active' : '' }}">
-                                <i class="far fa-circle nav-icon text-xs"></i>
+                                <i class="far fa-circle nav-icon text-xs text-success"></i>
                                 <p>Kirim Laporan</p>
                             </a>
                         </li>
+                        @endif
                     </ul>
                 </li>
                 @endif
 
+                {{-- SISTEM PERSETUJUAN / PENGAJUAN --}}
+                @if(in_array(auth()->user()->role->role, ['admin', 'manager', 'kepala cabang', 'karyawan', 'hrd']))
+                <li class="nav-item {{ request()->routeIs('cuti*') || request()->routeIs('dana*') || request()->routeIs('admin.dana*') ? 'menu-open' : '' }}">
+                    <a href="#" class="nav-link {{ request()->routeIs('cuti*') || request()->routeIs('dana*') || request()->routeIs('admin.dana*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-file-signature text-danger"></i>
+                        <p>
+                            {{ in_array(auth()->user()->role->role, ['admin', 'manager', 'kepala cabang']) ? 'Sistem Persetujuan' : 'Pengajuan Saya' }}
+                            <i class="right fas fa-angle-left"></i>
+                        </p>
+                    </a>
+                    <ul class="nav nav-treeview">
+                        {{-- Approve (Admin, Manager, Kepala Cabang) --}}
+                        @if(in_array(auth()->user()->role->role, ['admin', 'manager', 'kepala cabang','hrd']))
+                        <li class="nav-item">
+                            <a href="{{ route('cuti.admin') }}" class="nav-link {{ request()->routeIs('cuti.admin') ? 'active' : '' }}">
+                                <i class="far fa-circle nav-icon text-xs text-info"></i>
+                                <p>Persetujuan Cuti</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('admin.dana.index') }}" class="nav-link {{ request()->routeIs('admin.dana.*') ? 'active' : '' }}">
+                                <i class="far fa-circle nav-icon text-xs text-warning"></i>
+                                <p>Persetujuan Dana</p>
+                            </a>
+                        </li>
+                        @endif
+
+                        {{-- Input Pengajuan (Admin, Karyawan) --}}
+                        @if(in_array(auth()->user()->role->role, ['admin', 'karyawan', 'manager', 'kepala cabang',]))
+                        <li class="nav-item">
+                            <a href="{{ route('cuti.index') }}" class="nav-link {{ request()->routeIs('cuti.index') ? 'active' : '' }}">
+                                <i class="far fa-circle nav-icon text-xs text-info"></i>
+                                <p>Form Cuti Saya</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('dana.index') }}" class="nav-link {{ request()->routeIs('dana.index') ? 'active' : '' }}">
+                                <i class="far fa-circle nav-icon text-xs text-warning"></i>
+                                <p>Form Dana Saya</p>
+                            </a>
+                        </li>
+                        @endif
+                    </ul>
+                </li>
+                @endif
+                
+                {{-- ABSENSI MANUAL / ABSENSI SAYA: Admin, HRD, Manager, Kepala Cabang, Karyawan --}}
+                <li class="nav-item">
+                    <a href="{{ route('absensi') }}" class="nav-link {{ request()->routeIs('absensi*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-fingerprint text-danger"></i>
+                        <p>
+                            {{ in_array(auth()->user()->role->role, ['karyawan']) ? 'Absensi Saya' : 'Absensi Manual' }}
+                        </p>
+                    </a>
+                </li>
+
                 <li class="nav-header text-uppercase mt-3" style="letter-spacing: 1px; opacity: 0.6;">Pengaturan</li>
                 
+                {{-- PROFIL SAYA: Semua Role --}}
                 <li class="nav-item">
-                    <a href="{{ route('profile') }}" class="nav-link {{ request()->routeIs('profile') ? 'active' : '' }}">
+                    <a href="{{ route('profile') }}" class="nav-link {{ request()->routeIs('profile*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-user-cog text-light"></i>
                         <p>Profil Saya</p>
                     </a>
                 </li>
 
+                {{-- KONFIGURASI SISTEM: Hanya Admin --}}
                 @if(auth()->user()->role->role == 'admin')
                 <li class="nav-item">
                     <a href="#" class="nav-link">

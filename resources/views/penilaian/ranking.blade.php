@@ -63,8 +63,20 @@
                             <tbody>
                                 @foreach($hasil_akhir as $row)
                                 <tr>
-                                    <td class="text-left font-weight-bold">{{ $row['karyawan']->nama }}</td>
-                                    @foreach($kriterias as $k) <td>{{ $row['normalisasi'][$k->kode_kriteria] }}</td> @endforeach
+                                    <td class="text-left align-middle">
+                                        <div class="font-weight-bold text-dark">{{ $row['karyawan']->nama }}</div>
+                                        {{-- Menampilkan badge Area Kerja --}}
+                                        @if($row['karyawan']->areakerja->isNotEmpty())
+                                            @foreach($row['karyawan']->areakerja as $area)
+                                                <span class="badge badge-secondary font-weight-normal px-2 py-1 mt-1 small" style="font-size: 0.75rem;">
+                                                    <i class="fas fa-map-marker-alt mr-1 text-light"></i>{{ $area->lokasi }}
+                                                </span>
+                                            @endforeach
+                                        @else
+                                            <small class="text-muted d-block mt-1">-</small>
+                                        @endif
+                                    </td>
+                                    @foreach($kriterias as $k) <td class="align-middle">{{ $row['normalisasi'][$k->kode_kriteria] }}</td> @endforeach
                                 </tr>
                                 @endforeach
                             </tbody>
@@ -88,12 +100,24 @@
                             </thead>
                             <tbody>
                                 @foreach($hasil_akhir as $index => $row)
-                                <tr class="{{ $index == 0 ? 'bg-warning' : '' }}">
+                                <tr class="{{ $index == 0 ? 'bg-warning-light' : '' }}" style="{{ $index == 0 ? 'background-color: rgba(255, 193, 7, 0.15);' : '' }}">
                                     <td class="align-middle">
-                                        @if($index == 0) <i class="fas fa-crown text-danger fa-2x"></i> 
+                                        @if($index == 0) <i class="fas fa-crown text-warning fa-2x"></i> 
                                         @else <span class="h5 font-weight-bold">{{ $index + 1 }}</span> @endif
                                     </td>
-                                    <td class="text-left align-middle font-weight-bold h6">{{ $row['karyawan']->nama }}</td>
+                                    <td class="text-left align-middle">
+                                        <div class="font-weight-bold text-dark h6 mb-0">{{ $row['karyawan']->nama }}</div>
+                                        {{-- Menampilkan badge Area Kerja di tabel ranking agar konsisten --}}
+                                        @if($row['karyawan']->areakerja->isNotEmpty())
+                                            @foreach($row['karyawan']->areakerja as $area)
+                                                <span class="badge badge-dark font-weight-normal px-2 py-1 mt-1 small" style="font-size: 0.75rem; background-color: #495057;">
+                                                    <i class="fas fa-building mr-1 text-light"></i>{{ $area->lokasi }}
+                                                </span>
+                                            @endforeach
+                                        @else
+                                            <small class="text-muted d-block mt-1">-</small>
+                                        @endif
+                                    </td>
                                     <td class="align-middle font-weight-bold h5 text-success">{{ number_format($row['nilai_akhir'], 3) }}</td>
                                 </tr>
                                 @endforeach

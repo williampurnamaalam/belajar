@@ -18,7 +18,6 @@
         </div>
         
         <div class="card-body bg-light">
-            {{-- FORM FILTER PERIODE --}}
             <form action="{{ route('penilaian.input') }}" method="GET" class="mb-4">
                 <div class="row align-items-end">
                     <div class="col-md-3">
@@ -49,8 +48,6 @@
             </form>
 
             <hr>
-
-            {{-- PANDUAN PENILAIAN (Sesuai Skripsi Anda) --}}
             <div class="alert alert-info shadow-sm bg-white text-dark border-info mb-4">
                 <h6 class="font-weight-bold text-info border-bottom pb-2 mb-3"><i class="fas fa-info-circle mr-2"></i>Panduan Skala Penilaian</h6>
                 <div class="row small">
@@ -80,8 +77,6 @@
                     </div>
                 </div>
             </div>
-
-        {{-- FORM INPUT MATRIKS --}}
             @if($kriterias->isEmpty())
                 <div class="alert alert-warning text-center">
                     <i class="fas fa-exclamation-triangle mr-2"></i> Master Data Kriteria masih kosong. Silakan isi terlebih dahulu.
@@ -105,7 +100,7 @@
                     <input type="hidden" name="tahun" value="{{ $tahun }}">
                     
                     <div class="alert alert-success mb-3 py-2 px-3 shadow-sm border-0">
-                        <i class="fas fa-map-marker-alt mr-2"></i> Menampilkan Karyawan khusus di Area Kerja Anda <strong>(Area: {{ auth()->user()->area->nama_area ?? auth()->user()->area_id }})</strong>
+                        <i class="fas fa-map-marker-alt mr-2"></i> Menampilkan Karyawan di Area Kerja <strong class="text-capitalize">{{ auth()->user()->areakerja->first()?->lokasi ?? 'Kantor Utama' }}</strong>
                     </div>
 
                     <div class="table-responsive bg-white shadow-sm rounded border">

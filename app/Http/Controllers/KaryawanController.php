@@ -86,38 +86,49 @@ class KaryawanController extends Controller
         $request->validate([
             'nama'          => ['required', 'max:100'],
             'email'         => ['required', 'email', 'max:100', 'unique:users,email'],
-            // 'password'      => ['required', 'min:4'],
             'tanggal_lahir' => ['required', 'date'],
             'telepon'       => ['required', 'max:15'],
             'jabatan_id'    => ['required', 'exists:jabatan,id'], 
             'divisi_id'     => ['required', 'exists:divisi,id'],
             'role_id'       => ['required', 'exists:role,id'],
             'nik'           => ['required', 'max:50'],
-            'nip'           => ['required', 'max:50'],
             'gender'        => ['required', Rule::in(['Pria', 'Wanita'])],
         ]);
 
-        // $data = $request->all();
-        // $data['password'] = Hash::make($request->password);
+        // 2. LOGIKA MEMBUAT NIP OTOMATIS
+        $tahun = date('Y'); 
+        $prefix = "CH-" . $tahun . "-"; 
+        $lastUser = User::where('nip', 'LIKE', $prefix . '%')
+                        ->orderBy('nip', 'desc')
+                        ->first();
 
-        // User::create($data);
+        if ($lastUser) {
+  
+            $lastSerialNumber = substr($lastUser->nip, -4); 
+            $nextSerialNumber = sprintf('%04d', intval($lastSerialNumber) + 1);
+        } else {
+            $nextSerialNumber = '0001';
+        }
+
+        $autoNip = $prefix . $nextSerialNumber; // Hasil akhir: EMP-2026-0001
+
+
+        // 3. Simpan data ke Database
         $data = new User();
         $data->nama = $request->nama;
         $data->email = $request->email;
-        $data->password = 'admin';
-        $data->password = Hash::make($data->password);
+        $data->password = Hash::make($request->password);
+        $data->nip = $autoNip; 
         $data->role_id = $request->role_id;
         $data->jabatan_id = $request->jabatan_id;
         $data->divisi_id = $request->divisi_id;
         $data->tanggal_lahir = $request->tanggal_lahir;
         $data->telepon = $request->telepon;
         $data->nik = $request->nik;
-        $data->nip = $request->nip;
         $data->gender = $request->gender;
         $data->save();
 
-
-        return redirect('/karyawan')->with('success', 'Berhasil menambah data');
+        return redirect('/karyawan')->with('success', 'Berhasil menambah data karyawan dengan NIP: ' . $autoNip);
     }
 
 

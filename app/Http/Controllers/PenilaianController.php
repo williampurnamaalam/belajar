@@ -17,18 +17,13 @@ class PenilaianController extends Controller
         $tahun = $request->tahun ?? Carbon::now()->format('Y');
 
         $kriterias =Kriteria::orderBy('kode_kriteria', 'asc')->get();
-
-        // 1. CARI AREA ID PENILAI DARI TABEL TEAM
         $userLoginId = auth()->id();
         $timPenilai = Team::where('karyawan_id', $userLoginId)->first();
-        
         $area_id_penilai = $timPenilai ? $timPenilai->area_id : null;
 
-        // 2. KUNCI QUERY KARYAWAN BERDASARKAN AREA DI TABEL TEAM
         $karyawans = User::whereHas('role', function($q) {
                 $q->where('role', 'karyawan');
             })
-            // Mencari karyawan yang ada di tabel team DENGAN area_id yang sama dengan penilai
             ->whereHas('team', function($query) use ($area_id_penilai) {
                 $query->where('area_id', $area_id_penilai);
             })
@@ -38,8 +33,6 @@ class PenilaianController extends Controller
             ->where('tahun', $tahun)
             ->get()
             ->groupBy('karyawan_id');
-
-        // Tambahkan variabel $area_id_penilai ke compact
         return view('penilaian.index', compact('kriterias', 'karyawans', 'bulan', 'tahun', 'penilaian_existing', 'area_id_penilai'));
     }
 
@@ -47,17 +40,14 @@ class PenilaianController extends Controller
     {
         $bulan = $request->bulan;
         $tahun = $request->tahun;
-        $data_nilai = $request->nilai; // Format Array dari view
+        $data_nilai = $request->nilai;
 
-        // Validasi jika belum ada yang diinput
         if(!$data_nilai) {
             return redirect()->back()->with('error', 'Tidak ada data nilai yang diinput.');
         }
 
-        // Looping data Array Matrix: nilai[karyawan_id][kriteria_id] = skor
         foreach ($data_nilai as $karyawan_id => $kriteria_array) {
             foreach ($kriteria_array as $kriteria_id => $skor) {
-                // Jika input tidak kosong, simpan atau update ke database
                 if ($skor !== null) {
                     Penilaian::updateOrCreate(
                         [
@@ -80,14 +70,9 @@ class PenilaianController extends Controller
 
     public function hasilRanking(Request $request)
     {
-        // 1. Ambil filter bulan & tahun (Default: bulan ini)
         $bulan = $request->bulan ?? date('m');
         $tahun = $request->tahun ?? date('Y');
-
-        // 2. Ambil data Kriteria beserta bobotnya
         $kriterias = Kriteria::orderBy('kode_kriteria', 'asc')->get();
-
-        // 3. Ambil semua data nilai yang sudah diinput Kepala Cabang pada bulan tersebut
         $penilaians = Penilaian::with(['karyawan', 'kriteria'])
             ->where('bulan', $bulan)
             ->where('tahun', $tahun)
@@ -97,7 +82,6 @@ class PenilaianController extends Controller
         $nilai_max_min = [];
 
         if ($penilaians->isNotEmpty()) {
-            // 4. Cari nilai Max (Untuk Benefit) dan Min (Untuk Cost) dari setiap kriteria
             foreach ($kriterias as $k) {
                 $skor_kriteria = $penilaians->where('kriteria_id', $k->id)->pluck('nilai')->toArray();
                 if (!empty($skor_kriteria)) {
@@ -105,11 +89,8 @@ class PenilaianController extends Controller
                     $nilai_max_min[$k->id]['min'] = min($skor_kriteria);
                 }
             }
-
             // Kelompokkan data nilai berdasarkan Karyawan
             $data_karyawan = $penilaians->groupBy('karyawan_id');
-
-            // 5. PROSES RUMUS SAW (Normalisasi R & Preferensi V)
             foreach ($data_karyawan as $karyawan_id => $nilai_list) {
                 $user = $nilai_list->first()->karyawan;
                 $total_skor = 0;
@@ -139,8 +120,6 @@ class PenilaianController extends Controller
                     $bobot_persen = $k->bobot / 100;
                     $total_skor += ($normalisasi * $bobot_persen);
                 }
-
-                // Simpan hasil per karyawan
                 $hasil_akhir[] = [
                     'karyawan'    => $user,
                     'skor_asli'   => $detail_asli,        // Matriks Keputusan (X)
@@ -148,8 +127,6 @@ class PenilaianController extends Controller
                     'nilai_akhir' => round($total_skor, 3) // Nilai Akhir (V)
                 ];
             }
-
-            // 6. Urutkan Ranking (Dari nilai akhir terbesar ke terkecil)
             usort($hasil_akhir, function($a, $b) {
                 return $b['nilai_akhir'] <=> $a['nilai_akhir'];
             });

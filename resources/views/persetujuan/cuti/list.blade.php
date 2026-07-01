@@ -20,6 +20,21 @@
             </div>
         @endif
 
+        {{-- ALERT ERROR JIKA TEMBUS BACKEND --}}
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show shadow-sm border-0" role="alert" style="border-left: 5px solid #dc3545 !important;">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-exclamation-triangle mr-3 fa-lg"></i>
+                    <div>
+                        <span class="font-weight-bold">Gagal!</span> {{ session('error') }}
+                    </div>
+                </div>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        @endif
+
         <div class="card card-outline card-primary shadow-sm">
             <div class="card-header">
                 <h3 class="card-title text-bold text-dark">Daftar Persetujuan Cuti Karyawan</h3>
@@ -79,7 +94,13 @@
                                 @endif
                             </td>
                             <td class="text-center align-middle">
-                                @if($row->status == 'pending')
+                                {{-- JIKA INI DATA CUTI MILIK ADMIN YANG SEDANG LOGIN --}}
+                                @if($row->karyawan_id == auth()->id())
+                                    <span class="badge badge-secondary px-2 py-1 shadow-sm text-white font-weight-normal" title="Menunggu persetujuan dari rekan admin/atasan lainnya">
+                                        <i class="fas fa-user-shield mr-1"></i> ADMIN LAIN
+                                    </span>
+                                {{-- JIKA BUKAN DAN STATUSNYA PENDING --}}
+                                @elseif($row->status == 'pending')
                                     <div class="btn-group">
                                         {{-- Form Setuju --}}
                                         <form action="{{ route('cuti.proses', $row->id) }}" method="POST" onsubmit="return confirm('Setujui pengajuan ini?')">
@@ -90,7 +111,6 @@
                                             </button>
                                         </form>
                                         
-                                        {{-- Button Tolak --}}
                                         <button type="button" class="btn btn-danger btn-sm shadow-sm" data-toggle="modal" data-target="#modal-tolak-{{ $row->id }}" title="Tolak">
                                             <i class="fas fa-times"></i>
                                         </button>
@@ -101,8 +121,8 @@
                             </td>
                         </tr>
 
-                        {{-- MODAL TOLAK (Diletakkan di dalam loop agar ID sesuai) --}}
-                        @if($row->status == 'pending')
+
+                        @if($row->status == 'pending' && $row->karyawan_id != auth()->id())
                         <div class="modal fade" id="modal-tolak-{{ $row->id }}" tabindex="-1" role="dialog" data-backdrop="static">
                             <div class="modal-dialog modal-dialog-centered" role="document">
                                 <div class="modal-content border-0 shadow-lg">
@@ -141,7 +161,7 @@
 @push('styles')
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap4.min.css">
 <style>
-    /* Styling Header Tabel agar identik dengan tema Area Kerja */
+
     .table thead th {
         border-top: 0;
         border-bottom-width: 1px;
@@ -156,7 +176,7 @@
         padding: 12px 15px;
         color: #495057;
     }
-    /* Hover effect agar user tahu baris mana yang dilihat */
+  
     .table-hover tbody tr:hover {
         background-color: rgba(0, 123, 255, 0.05);
     }

@@ -36,6 +36,14 @@
         </div>
     @endif
 
+    {{-- ALERT NOTIFIKASI ERROR (Tambahan Baru) --}}
+    @if ($errors->any())
+        <div class="alert alert-danger shadow-sm border-0 alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle mr-2"></i> <strong>Gagal Memproses Data!</strong> {{ $errors->first() }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+    @endif
+
     <div class="card shadow-sm border-0">
         <div class="card-header bg-white py-3">
             <div class="d-flex justify-content-between align-items-center">
@@ -80,11 +88,11 @@
                                 <button class="btn btn-sm btn-warning shadow-sm" data-toggle="modal" data-target="#modalEditKriteria{{ $row->id }}" title="Edit Kriteria">
                                     <i class="fas fa-edit text-white"></i>
                                 </button>
-                                
+
                                 {{-- Tombol Hapus --}}
                                 <form action="{{ route('kriteria.destroy', $row->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin menghapus kriteria ini? Menghapus kriteria dapat mempengaruhi hasil perhitungan SAW.');">
                                     @csrf
-                                    @method('DELETE')
+                                     @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-danger shadow-sm" title="Hapus Kriteria">
                                         <i class="fas fa-trash"></i>
                                     </button>
@@ -114,24 +122,37 @@
                 <div class="modal-body p-4">
                     <div class="form-group">
                         <label class="font-weight-bold">Kode Kriteria</label>
-                        <input type="text" name="kode_kriteria" class="form-control" placeholder="Contoh: C1" required>
-                        <small class="text-muted">Gunakan format C1, C2, C3, dst.</small>
+                        <input type="text" name="kode_kriteria" class="form-control @error('kode_kriteria') is-invalid @enderror" value="{{ old('kode_kriteria') }}" placeholder="Contoh: C1" required>
+                        @error('kode_kriteria')
+                            <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                        @else
+                            <small class="text-muted">Gunakan format C1, C2, C3, dst.</small>
+                        @enderror
                     </div>
                     <div class="form-group">
                         <label class="font-weight-bold">Nama Kriteria</label>
-                        <input type="text" name="nama_kriteria" class="form-control" placeholder="Contoh: Absensi" required>
+                        <input type="text" name="nama_kriteria" class="form-control @error('nama_kriteria') is-invalid @enderror" value="{{ old('nama_kriteria') }}" placeholder="Contoh: Absensi" required>
+                        @error('nama_kriteria')
+                            <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                        @enderror
                     </div>
                     <div class="form-group">
                         <label class="font-weight-bold">Sifat / Jenis Kriteria</label>
-                        <select name="jenis" class="form-control custom-select" required>
+                        <select name="jenis" class="form-control custom-select @error('jenis') is-invalid @enderror" required>
                             <option value="">-- Pilih Jenis --</option>
-                            <option value="Benefit">Benefit (Semakin besar nilai, semakin bagus)</option>
-                            <option value="Cost">Cost (Semakin besar nilai, semakin buruk)</option>
+                            <option value="Benefit" {{ old('jenis') == 'Benefit' ? 'selected' : '' }}>Benefit (Semakin besar nilai, semakin bagus)</option>
+                            <option value="Cost" {{ old('jenis') == 'Cost' ? 'selected' : '' }}>Cost (Semakin besar nilai, semakin buruk)</option>
                         </select>
+                        @error('jenis')
+                            <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                        @enderror
                     </div>
                     <div class="form-group">
                         <label class="font-weight-bold">Bobot (%)</label>
-                        <input type="number" name="bobot" class="form-control" placeholder="Contoh: 20" min="1" max="100" required>
+                        <input type="number" name="bobot" class="form-control @error('bobot') is-invalid @enderror" value="{{ old('bobot') }}" placeholder="Contoh: 20" min="1" max="100" required>
+                        @error('bobot')
+                            <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                        @enderror
                     </div>
                 </div>
                 <div class="modal-footer bg-light">
@@ -160,22 +181,34 @@
                 <div class="modal-body p-4">
                     <div class="form-group">
                         <label class="font-weight-bold">Kode Kriteria</label>
-                        <input type="text" name="kode_kriteria" class="form-control" value="{{ $row->kode_kriteria }}" required>
+                        <input type="text" name="kode_kriteria" class="form-control @error('kode_kriteria') is-invalid @enderror" value="{{ old('kode_kriteria', $row->kode_kriteria) }}" required>
+                        @error('kode_kriteria')
+                            <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                        @enderror
                     </div>
                     <div class="form-group">
                         <label class="font-weight-bold">Nama Kriteria</label>
-                        <input type="text" name="nama_kriteria" class="form-control" value="{{ $row->nama_kriteria }}" required>
+                        <input type="text" name="nama_kriteria" class="form-control @error('nama_kriteria') is-invalid @enderror" value="{{ old('nama_kriteria', $row->nama_kriteria) }}" required>
+                        @error('nama_kriteria')
+                            <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                        @enderror
                     </div>
                     <div class="form-group">
                         <label class="font-weight-bold">Sifat / Jenis Kriteria</label>
-                        <select name="jenis" class="form-control custom-select" required>
-                            <option value="Benefit" {{ $row->jenis == 'Benefit' ? 'selected' : '' }}>Benefit (Semakin besar nilai, semakin bagus)</option>
-                            <option value="Cost" {{ $row->jenis == 'Cost' ? 'selected' : '' }}>Cost (Semakin besar nilai, semakin buruk)</option>
+                        <select name="jenis" class="form-control custom-select @error('jenis') is-invalid @enderror" required>
+                            <option value="Benefit" {{ old('jenis', $row->jenis) == 'Benefit' ? 'selected' : '' }}>Benefit (Semakin besar nilai, semakin bagus)</option>
+                            <option value="Cost" {{ old('jenis', $row->jenis) == 'Cost' ? 'selected' : '' }}>Cost (Semakin besar nilai, semakin buruk)</option>
                         </select>
+                        @error('jenis')
+                            <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                        @enderror
                     </div>
                     <div class="form-group">
                         <label class="font-weight-bold">Bobot (%)</label>
-                        <input type="number" name="bobot" class="form-control" value="{{ $row->bobot }}" min="1" max="100" required>
+                        <input type="number" name="bobot" class="form-control @error('bobot') is-invalid @enderror" value="{{ old('bobot', $row->bobot) }}" min="1" max="100" required>
+                        @error('bobot')
+                            <span class="invalid-feedback" role="alert"><strong>{{ $message }}</strong></span>
+                        @enderror
                     </div>
                 </div>
                 <div class="modal-footer bg-light">
@@ -196,7 +229,7 @@
 <script>
     $(document).ready(function() {
         $('#tableKriteria').DataTable({
-            "order": [[1, "asc"]], // Urutkan berdasarkan Kode Kriteria (C1, C2, dst)
+            "order": [[1, "asc"]], 
             "responsive": true,
             "autoWidth": false,
             "language": {

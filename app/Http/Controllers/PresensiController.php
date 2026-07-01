@@ -29,13 +29,19 @@ class PresensiController extends Controller
         return view('presensi.karyawan', compact('area', 'karyawans'));
     }
     
-    public function detailKaryawan($user_id)
+public function detailKaryawan($user_id)
     {
         $karyawan = User::with(['jabatan', 'areaKerja'])->findOrFail($user_id);
         
-        $start_date = Carbon::now()->startOfMonth(); 
-        $end_date = Carbon::now()->endOfMonth();
+        // TANGKAP INPUT FILTER (Jika kosong, otomatis default ke bulan & tahun berjalan)
+        $bulan = request('bulan', Carbon::now()->month);
+        $tahun = request('tahun', Carbon::now()->year);
 
+        // SET TANGGAL AWAL & AKHIR BERDASARKAN FILTER
+        $start_date = Carbon::createFromDate($tahun, $bulan, 1)->startOfMonth(); 
+        $end_date = Carbon::createFromDate($tahun, $bulan, 1)->endOfMonth();
+
+        // Ambil data absensi sesuai range tanggal filter
         $dataAbsensi = Absensi::where('karyawan_id', $user_id)
                     ->whereBetween('tanggal', [$start_date, $end_date])
                     ->get()
@@ -49,7 +55,7 @@ class PresensiController extends Controller
                         ];
                     });
 
-
+        // Ambil data cuti sesuai range tanggal filter
         $dataCuti = Cuti::where('karyawan_id', $user_id)
                     ->where('status', 'disetujui')
                     ->where(function ($query) use ($start_date, $end_date) {
@@ -84,6 +90,7 @@ class PresensiController extends Controller
         // 3. GABUNGKAN ABSENSI & CUTI, LALU URUTKAN DARI TANGGAL TERBARU
         $riwayat = collect($dataAbsensi)->concat($riwayatCuti)->sortByDesc('tanggal')->values();
 
-        return view('presensi.detail', compact('karyawan', 'riwayat'));
+        // 4. OPER DATA FILTER (bulan & tahun) KE VIEW AGAR PILIHAN SELECT TIDAK BERUBAH
+        return view('presensi.detail', compact('karyawan', 'riwayat', 'bulan', 'tahun'));
     }
 }

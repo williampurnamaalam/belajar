@@ -23,8 +23,15 @@ class KriteriaController extends Controller
             'jenis'         => 'required|in:Benefit,Cost',
             'bobot'         => 'required|numeric|min:1|max:100'
         ], [
-            'kode_kriteria.unique' => 'Kode Kriteria ini sudah digunakan, silakan gunakan kode lain.',
-            'bobot.max'            => 'Bobot maksimal adalah 100.'
+            'kode_kriteria.required' => 'Kode kriteria wajib diisi.',
+            'kode_kriteria.unique'   => 'Kode kriteria ini sudah digunakan, silakan gunakan kode lain.',
+            'kode_kriteria.max'      => 'Kode kriteria maksimal berisi 10 karakter.',
+            'nama_kriteria.required' => 'Nama kriteria wajib diisi.',
+            'jenis.required'         => 'Jenis kriteria wajib dipilih.',
+            'bobot.required'         => 'Bobot kriteria wajib diisi.',
+            'bobot.numeric'          => 'Bobot harus berupa angka.',
+            'bobot.min'              => 'Bobot minimal adalah 1.',
+            'bobot.max'              => 'Bobot maksimal adalah 100.'
         ]);
 
         $data = new Kriteria();
@@ -45,7 +52,15 @@ class KriteriaController extends Controller
             'jenis'         => 'required|in:Benefit,Cost',
             'bobot'         => 'required|numeric|min:1|max:100'
         ], [
-            'kode_kriteria.unique' => 'Kode Kriteria ini sudah digunakan oleh kriteria lain.',
+            'kode_kriteria.required' => 'Kode kriteria tidak boleh kosong.',
+            'kode_kriteria.unique'   => 'Kode kriteria ini sudah digunakan oleh kriteria lain.',
+            'kode_kriteria.max'      => 'Kode kriteria maksimal berisi 10 karakter.',
+            'nama_kriteria.required' => 'Nama kriteria tidak boleh kosong.',
+            'jenis.required'         => 'Jenis kriteria wajib dipilih.',
+            'bobot.required'         => 'Bobot wajib diisi.',
+            'bobot.numeric'          => 'Bobot harus berupa angka.',
+            'bobot.min'              => 'Bobot minimal adalah 1.',
+            'bobot.max'              => 'Bobot maksimal adalah 100.'
         ]);
 
         $data = Kriteria::findOrFail($id);
@@ -57,7 +72,6 @@ class KriteriaController extends Controller
 
         return redirect()->back()->with('success', 'Data Kriteria berhasil diperbarui!');
     }
-
 
     public function destroy($id)
     {

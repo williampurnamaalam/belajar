@@ -68,13 +68,13 @@
                                         @error('nik') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                     </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label>NIP <span class="text-danger">*</span></label>
-                                        <input type="text" name="nip" class="form-control @error('nip') is-invalid @enderror" value="{{ old('nip') }}" placeholder="Nomor Induk Pegawai">
-                                        @error('nip') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                    </div>
+                               <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>NIP</label>
+                                    <input type="text" class="form-control" value="Otomatis oleh Sistem" readonly disabled style="background-color: #e9ecef; cursor: not-allowed;">
+                                    <small class="text-muted">NIP akan dibuat otomatis setelah data disimpan.</small>
                                 </div>
+                            </div>
                             </div>
                         </div>
 

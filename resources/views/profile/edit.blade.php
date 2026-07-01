@@ -34,7 +34,7 @@
                     </div>
 
                     <div class="alert alert-warning shadow-sm mt-3">
-                        <small><i class="fas fa-exclamation-triangle mr-1"></i> Edit data anda</small>
+                        <small><i class="fas fa-info-circle mr-1"></i> Pastikan data yang Anda masukkan sudah benar dan valid sebelum menyimpan.</small>
                     </div>
                 </div>
 
@@ -87,46 +87,58 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="text-muted">Email Perusahaan</label>
-                                        <input type="text" class="form-control bg-light" value="{{ auth()->user()->email }}" readonly>
+                                        <input type="text" class="form-control bg-light" value="{{ auth()->user()->email }}" readonly disabled>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="text-muted">NIP</label>
-                                        <input type="text" class="form-control bg-light" value="{{ auth()->user()->nip }}" readonly>
+                                        <input type="text" class="form-control bg-light" value="{{ auth()->user()->nip }}" readonly disabled>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="text-muted">Jenis Kelamin</label>
-                                        <input type="text" class="form-control bg-light" value="{{ auth()->user()->gender }}" readonly>
+                                        <input type="text" class="form-control bg-light" value="{{ auth()->user()->gender == 'L' ? 'Laki-laki' : 'Perempuan' }}" readonly disabled>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label class="text-muted">Divisi / Jabatan</label>
-                                        <input type="text" class="form-control bg-light" value="{{ auth()->user()->divisi }} / {{ auth()->user()->role }}" readonly>
+                                        {{-- Menghindari konversi objek ke string langsung --}}
+                                        <input type="text" class="form-control bg-light" value="{{ auth()->user()->divisi->nama_divisi ?? '-' }} / {{ auth()->user()->role->role ?? '-' }}" readonly disabled>
                                     </div>
                                 </div>
                             </div>
 
                             <hr>
-                            <div class="form-group">
-                                <label>Ganti Password <small class="text-muted">(Kosongkan jika tidak ingin mengubah)</small></label>
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text"><i class="fas fa-lock text-warning"></i></span>
+                            <h5 class="text-muted small text-uppercase mb-3">Keamanan</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Password Baru <small class="text-muted">(Kosongkan jika tidak diganti)</small></label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i class="fas fa-lock text-warning"></i></span>
+                                            </div>
+                                            <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" placeholder="Masukkan password baru">
+                                            @error('password') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                        </div>
                                     </div>
-                                    <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" placeholder="Masukkan password baru">
-                                    @error('password') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Konfirmasi Password Baru</label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i class="fas fa-check-double text-success"></i></span>
+                                            </div>
+                                            <input type="password" name="password_confirmation" class="form-control" placeholder="Ulangi password baru">
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <input type="hidden" name="jabatan_id" value="{{ auth()->user()->jabatan_id }}">
-                            <input type="hidden" name="divisi_id" value="{{ auth()->user()->divisi_id }}">
-                            <input type="hidden" name="role_id" value="{{ auth()->user()->role_id }}">
-                            <input type="hidden" name="gender" value="{{ auth()->user()->gender }}">
-                            <input type="hidden" name="nip" value="{{ auth()->user()->nip }}">
-                            <input type="hidden" name="email" value="{{ auth()->user()->email }}">
+
                         </div>
                         <div class="card-footer bg-white text-right">
                             <a href="{{ route('profile') }}" class="btn btn-link text-secondary mr-2">Batal</a>

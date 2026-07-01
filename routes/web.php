@@ -4,6 +4,7 @@ use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\AreakerjaController;
 use App\Http\Controllers\CutiController;
 use App\Http\Controllers\DanaController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DivisiController;
 use App\Http\Controllers\JabatanController;
 use App\Http\Controllers\KaryawanController;
@@ -11,22 +12,20 @@ use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\LemburController;
 use App\Http\Controllers\PresensiController;
 use App\Http\Controllers\RoleController;
-use App\Http\Controllers\LoginContoller;
+use App\Http\Controllers\LoginController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
 
-Route::get('/login', [LoginContoller::class, 'showLogin'])->name('login');
-Route::post('/login', [LoginContoller::class, 'login']);
-Route::post('/logout', [LoginContoller::class, 'logout'])->name('logout');
+Route::get('/', [LoginController::class, 'showLogin']);
+Route::get('/login', [LoginController::class, 'showLogin'])->name('login');
+Route::post('/login', [LoginController::class, 'login']);
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 
 Route::middleware(['auth'])->group(function () {
 
     // 1. DASHBOARD & PROFILE (Bisa diakses semua role yang login)
-    Route::get('/dashboard', [LoginContoller::class, 'dashboard'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/profile', [KaryawanController::class, 'showprofile'])->name('profile');
     Route::get('/profile/edit', [KaryawanController::class, 'editProfile'])->name('profile.edit');
     Route::put('/profile/update', [KaryawanController::class, 'updateProfile'])->name('profile.update');
@@ -45,7 +44,11 @@ Route::middleware(['auth'])->group(function () {
     // 5.laporan
     Route::get('/laporan-tugas', [LaporanController::class, 'index'])->name('laporan.index');
     Route::post('/laporan-tugas', [LaporanController::class, 'store'])->name('laporan.store');
+    
     Route::delete('/laporan/{id}', [LaporanController::class, 'destroy'])->name('laporan.destroy');
+
+    Route::get('/pengajuan-dana', [DanaController::class, 'index'])->name('dana.index');
+Route::post('/pengajuan-dana/store', [DanaController::class, 'store'])->name('dana.store');
 
     // --------------------------------------------------------------------
     // 3. KHUSUS ADMIN, HRD, & MANAGER (Master Data & Approval)
@@ -78,8 +81,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/persetujuan/admin/cuti', [CutiController::class, 'adminIndex'])->name('cuti.admin');
         Route::put('/persetujuan/proses/{id}', [CutiController::class, 'approveReject'])->name('cuti.proses');
 
-        // Approval Cuti 
-        Route::get('/persetujuan/admin/dana', [DanaController::class, 'adminIndex'])->name('dana.admin');
+        // Route Kelola Pengajuan Dana (Admin)
+        Route::get('/admin/pengajuan-dana', [DanaController::class, 'adminIndex'])->name('admin.dana.index');
+        Route::post('/admin/pengajuan-dana/{id}/proses', [DanaController::class, 'adminUpdate'])->name('admin.dana.update');
 
         // approval lembur
         Route::get('/admin/persetujuan-lembur', [LemburController::class, 'adminIndex'])->name('admin.lembur.index');
@@ -94,6 +98,7 @@ Route::middleware(['auth'])->group(function () {
         // laporan
         Route::get('/admin/monitoring-tugas', [LaporanController::class, 'adminIndex'])->name('admin.laporan.index');
         Route::get('/admin/laporan/cetak', [LaporanController::class, 'cetakLaporan'])->name('admin.laporan.cetak');
+        Route::get('/admin/laporan/{id}', [LaporanController::class, 'show'])->name('admin.laporan.show');  
         // kriteria
         Route::resource('kriteria', \App\Http\Controllers\KriteriaController::class);
         // penilaian

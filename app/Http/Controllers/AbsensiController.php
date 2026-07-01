@@ -17,29 +17,24 @@ class AbsensiController extends Controller
         $hariIni = now()->toDateString();
         $bulanIni = now()->month;
         $tahunIni = now()->year;
-
-        // 1. CEK CUTI HARI INI
         $cutiAktif = Cuti::where('karyawan_id', $user->id)
             ->where('status', 'disetujui')
             ->where('tanggal_mulai', '<=', $hariIni)
             ->where('tanggal_selesai', '>=', $hariIni)
             ->first();
 
-        // 2. CEK ABSEN HARI INI
         $absenHariIni = Absensi::where('karyawan_id', $user->id)
             ->where('tanggal', $hariIni)
             ->first();
 
         $area = $user->areakerja()->first();
 
-        // 3. AMBIL RIWAYAT ABSEN BULAN INI
         $riwayat = Absensi::where('karyawan_id', $user->id)
             ->whereMonth('tanggal', $bulanIni)
             ->whereYear('tanggal', $tahunIni)
             ->orderBy('tanggal', 'desc')
             ->get();
 
-        // 4. HITUNG TOTAL HARI CUTI/IZIN BULAN INI
         $dataCutiBulanIni = Cuti::where('karyawan_id', $user->id)
             ->where('status', 'disetujui')
             ->whereMonth('tanggal_mulai', $bulanIni)
@@ -52,22 +47,12 @@ class AbsensiController extends Controller
             $end = Carbon::parse($cuti->tanggal_selesai);
             $totalHariCuti += $start->diffInDays($end) + 1;
         }
-
-        // 5. HITUNG TOTAL JAM LEMBUR DARI TABEL LEMBURS
-        $totalMenitLembur = Lembur::where('karyawan_id', $user->id)
-            ->where('status', 'disetujui')
-            ->whereMonth('tanggal', $bulanIni)
-            ->whereYear('tanggal', $tahunIni)
-            ->sum('durasi_aktual_menit');
-
-        $totalJamLembur = floor($totalMenitLembur / 60); 
-
-        // 6. UPDATE STATS
+    
         $stats = [
-            'hadir'  => $riwayat->where('status', 'hadir')->count(),
+            'hadir'  => $riwayat->where ('status', 'hadir')->count(),
             'cuti'   => $totalHariCuti, 
             'alpa'   => $riwayat->where('status', 'alpa')->count(),
-            'lembur' => $totalJamLembur,
+            
         ];
 
         return view('absensi.index', compact('area', 'riwayat', 'stats', 'absenHariIni', 'cutiAktif'));
@@ -77,11 +62,7 @@ class AbsensiController extends Controller
         {
             $hariIni = now()->toDateString();
             $jamSekarang = now();
-            
-            // --- KONFIGURASI JAM MASUK RESMI ---
             $jamMasukResmi = Carbon::createFromTimeString('08:00:00');
-
-            // 1. CEK STATUS CUTI (Lapis Keamanan)
             $sedangCuti = Cuti::where('karyawan_id', auth()->id())
                 ->where('status', 'disetujui')
                 ->where('tanggal_mulai', '<=', $hariIni)
@@ -92,7 +73,6 @@ class AbsensiController extends Controller
                 return redirect()->back()->with('error', 'Gagal! Anda sedang dalam masa cuti/izin resmi.');
             } 
 
-            // 2. VALIDASI REQUEST
             $request->validate([
                 'area_id' => 'required',
                 'lat' => 'required|numeric',
@@ -102,26 +82,23 @@ class AbsensiController extends Controller
             $userIp = $request->ip();
             $area = Areakerja::findOrFail($request->area_id);
             $rawIps = $area->ip_address;
-            
-            // 3. CEK FORMAT DATA IP
             if (is_array($rawIps)) {
                 $allowedIps = $rawIps;
             } else {
                 $allowedIps = !empty($rawIps) ? array_map('trim', explode(',', $rawIps)) : [];
             }
 
-            // 4. VALIDASI IP KANTOR
+            // VALIDASI IP KANTOR
             if (!empty($allowedIps) && !in_array($userIp, $allowedIps)) {
                 return redirect()->back()->with('error', 'Gagal! Gunakan Wi-Fi kantor untuk absen.');
             }
 
-            // 5. VALIDASI GPS (GEOFENCING)
+            // VALIDASI GPS (GEOFENCING)
             $jarak = $this->hitungJarak($request->lat, $request->lon, $area->latitude, $area->longitude);   
             if ($jarak > $area->radius) {
                 return redirect()->back()->with('error', 'Gagal! Anda berada di luar radius.');
             }
 
-            // 6. CEK DOUBLE ABSEN
             $exists = Absensi::where('karyawan_id', auth()->id())
                 ->where('tanggal', $hariIni)
                 ->exists();
@@ -129,21 +106,18 @@ class AbsensiController extends Controller
             if($exists) {
                 return redirect()->back()->with('error', 'Anda sudah absen hari ini.');
             }
-
-            // 7. LOGIKA KETERLAMBATAN
             $keterangan = 'Hadir Tepat Waktu';
             if ($jamSekarang->gt($jamMasukResmi)) {
                 $menitTelat = $jamSekarang->diffInMinutes($jamMasukResmi);
                 $keterangan = "Terlambat $menitTelat menit";
             }
 
-            // 8. SIMPAN DATA
             Absensi::create([
                 'karyawan_id' => auth()->id(),
                 'tanggal'     => $hariIni,
                 'jam_masuk'   => $jamSekarang->toTimeString(),
                 'status'      => 'hadir',
-                'keterangan'  => $keterangan, // Menyimpan info telat
+                'keterangan'  => $keterangan,
                 'area_id'     => $request->area_id,
                 'latitude'    => $request->lat,
                 'longitude'   => $request->lon,

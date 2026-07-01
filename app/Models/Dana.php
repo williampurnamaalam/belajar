@@ -8,5 +8,21 @@ use Illuminate\Database\Eloquent\Model;
 class Dana extends Model
 {
     use HasFactory;
-    protected $table = 'dana';
+
+    // Sesuai nama tabel di ERD Anda
+    protected $table = 'dana'; 
+
+    protected $fillable = [
+        'karyawan_id', 
+        'nominal', 
+        'keperluan', 
+        'status', 
+        'catatan_admin'
+    ];
+
+    // Relasi ke tabel users
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'karyawan_id', 'id');
+    }
 }

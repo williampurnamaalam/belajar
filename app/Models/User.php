@@ -75,5 +75,8 @@ class User extends Authenticatable
     {
         return $this->hasOne(Team::class, 'karyawan_id', 'id');
     }   
-
+    public function area()
+    {
+        return $this->belongsTo(Areakerja::class, 'area_id');
+    }
 }

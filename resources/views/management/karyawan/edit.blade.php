@@ -112,8 +112,9 @@
                                     </div>
                                     <div class="form-group col-md-4">
                                         <label>NIP <span class="text-danger">*</span></label>
-                                        <input type="text" name="nip" class="form-control @error('nip') is-invalid @enderror" value="{{ old('nip', $karyawan->nip) }}" required>
-                                        @error('nip') <div class="invalid-feedback">{{ $message }}</div> @enderror
+
+                                        {{-- Ganti disabled menjadi readonly --}}
+                                        <input type="text" name="nip" class="form-control" value="{{ $karyawan->nip }}" readonly>
                                     </div>
                                     <div class="form-group col-md-4">
                                         <label>Telepon <span class="text-danger">*</span></label>

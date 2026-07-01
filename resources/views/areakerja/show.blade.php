@@ -12,7 +12,7 @@
                         <i class="fas fa-map-marked-alt fa-3x text-primary"></i>
                     </div>
                     <h3 class="profile-username text-center font-weight-bold text-uppercase">{{ $area->lokasi }}</h3>
-                    <p class="text-muted text-center small mb-4">ID Area: #{{ $area->id }}</p>
+                    <p class="text-muted text-center small mb-4">ID Area: {{ $area->id }}</p>
                     
                     <ul class="list-group list-group-unbordered mb-3">
                         <li class="list-group-item border-top-0">
@@ -62,10 +62,6 @@
                     </div>
 
                     <div class="mt-4">
-                        <strong class="text-dark"><i class="fas fa-info-circle mr-1 text-primary"></i> Deskripsi Lokasi</strong>
-                        <p class="text-muted small mt-2 bg-light p-3 rounded border text-justify">
-                            {{ $area->detail ?? 'Tidak ada informasi tambahan untuk area ini.' }}
-                        </p>
                     </div>
                     <a href="{{ route('areakerja') }}" class="btn btn-outline-secondary btn-block mt-3 shadow-sm">
                         <i class="fas fa-arrow-left mr-1"></i> Kembali 

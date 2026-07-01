@@ -41,9 +41,6 @@
                 <h5 class="mb-0 font-weight-bold text-primary">
                     <i class="fas fa-tasks mr-2"></i>Monitoring Laporan Tugas Kerja
                 </h5>
-                <button onclick="bukaTabCetak()" class="btn btn-outline-secondary btn-sm no-print">
-                    <i class="fas fa-print mr-1"></i> Cetak Laporan
-                </button>
             </div>
         </div>
         
@@ -53,7 +50,6 @@
                 <div class="row">
                     <div class="col-md-4 mb-2">
                         <label class="small font-weight-bold">Pilih Karyawan</label>
-                        {{-- PERBAIKAN: Gunakan custom-select --}}
                         <select id="filterKaryawan" class="form-control custom-select">
                             <option value="">Semua Karyawan</option>
                             @foreach($karyawans as $k)
@@ -63,7 +59,6 @@
                     </div>
                     <div class="col-md-3 mb-2">
                         <label class="small font-weight-bold">Bulan</label>
-                        {{-- PERBAIKAN: Gunakan custom-select --}}
                         <select id="filterBulan" class="form-control custom-select">
                             <option value="">Semua Bulan</option>
                             @foreach(range(1, 12) as $m)
@@ -75,7 +70,6 @@
                     </div>
                     <div class="col-md-3 mb-2">
                         <label class="small font-weight-bold">Tahun</label>
-                        {{-- PERBAIKAN: Gunakan custom-select --}}
                         <select id="filterTahun" class="form-control custom-select">
                             <option value="">Semua Tahun</option>
                             @for ($y = date('Y'); $y >= date('Y')-2; $y--)
@@ -101,7 +95,7 @@
                             <th>Judul & Deskripsi</th>
                             <th width="15%">Nominal (Rp)</th>
                             <th width="8%">Bukti</th>
-                            <th width="8%" class="no-print">Opsi</th>
+                            <th width="10%" class="no-print">Opsi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -132,9 +126,10 @@
                                 @endif
                             </td>
                             <td class="text-center no-print">
-                                <button class="btn btn-sm btn-primary shadow-sm" data-toggle="modal" data-target="#modalDetailAdmin{{$row->id}}">
-                                    <i class="fas fa-eye"></i>
-                                </button>
+                                {{-- LINK BARU MENUJU HALAMAN DETAIL MANDIRI --}}
+                                <a href="{{ route('admin.laporan.show', $row->id) }}" class="btn btn-sm btn-primary shadow-sm">
+                                    <i class="fas fa-eye mr-1"></i> Detail
+                                </a>
                             </td>
                         </tr>
                         @endforeach
@@ -152,40 +147,6 @@
         </div>
     </div>
 </div>
-
-{{-- MODAL DETAIL --}}
-@foreach($daftarLaporan as $row)
-<div class="modal fade no-print" id="modalDetailAdmin{{$row->id}}" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title font-weight-bold">
-                    <i class="fas fa-info-circle mr-2"></i>Detail Laporan: {{ $row->user->nama }}
-                </h5>
-                <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
-            </div>
-            <div class="modal-body p-0">
-                <table class="table table-striped mb-0">
-                    <tr><th width="30%" class="pl-4">Judul Laporan</th><td class="pr-4">{{ $row->judul_laporan }}</td></tr>
-                    <tr><th class="pl-4">Tanggal Kirim</th><td class="pr-4">{{ \Carbon\Carbon::parse($row->tanggal_kirim)->translatedFormat('d F Y') }}</td></tr>
-                    <tr>
-                        <th class="pl-4">Nominal Transaksi</th>
-                        <td class="pr-4 font-weight-bold text-success">Rp {{ number_format($row->nominal_transaksi ?? 0, 0, ',', '.') }}</td>
-                    </tr>
-                    <tr>
-                        <th class="pl-4">Isi Deskripsi</th>
-                        <td class="pr-4"><p class="text-justify mb-0" style="white-space: pre-line;">{{ $row->deskripsi }}</p></td>
-                    </tr>
-                </table>
-            </div>
-            <div class="modal-footer bg-light py-2">
-                <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Tutup</button>
-            </div>
-        </div>
-    </div>
-</div>
-@endforeach
-
 @endsection
 
 @push('scripts')
